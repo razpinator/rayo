@@ -85,6 +85,8 @@ type Elif struct {
     Body []Stmt
     span diag.Span
 }
+func (e *Elif) Span() diag.Span { return e.span }
+func (e *Elif) isStmt() {}
 
 type WhileStmt struct {
     Cond Expr
@@ -125,6 +127,8 @@ type Except struct {
     Body  []Stmt
     span  diag.Span
 }
+func (e *Except) Span() diag.Span { return e.span }
+func (e *Except) isStmt() {}
 
 type ExprStmt struct {
     Expr Expr

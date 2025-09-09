@@ -95,12 +95,12 @@ func checkExprNullSafety(expr ast.Expr, scope *Scope) {
     switch e := expr.(type) {
     case *ast.Attr:
         typ := InferType(e.Target)
-        if opt, ok := typ.(*OptionalType); ok {
+        if _, ok := typ.(*OptionalType); ok {
             reporter.Report(diag.Span{}, "unsafe dereference of optional value")
         }
     case *ast.Index:
         typ := InferType(e.Target)
-        if opt, ok := typ.(*OptionalType); ok {
+        if _, ok := typ.(*OptionalType); ok {
             reporter.Report(diag.Span{}, "unsafe index of optional value")
         }
     }

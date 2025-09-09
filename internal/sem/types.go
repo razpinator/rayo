@@ -20,7 +20,7 @@ type AnyType struct{}
 func InferType(expr ast.Expr) Type {
     switch e := expr.(type) {
     case *ast.Literal:
-        switch v := e.Value.(type) {
+        switch e.Value.(type) {
         case int:
             return &BasicType{Name: "int"}
         case string:

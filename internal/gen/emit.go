@@ -3,7 +3,6 @@ package gen
 import (
     "functure/internal/ast"
     "fmt"
-    "strings"
 )
 
 // EmitModule emits Go code for a module AST.

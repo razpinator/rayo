@@ -2,7 +2,6 @@ package gen
 
 import (
     "functure/internal/ast"
-    "fmt"
 )
 
 // LowerTryExcept lowers try/except/finally to Go error handling.

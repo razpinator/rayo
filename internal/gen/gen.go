@@ -1,7 +1,6 @@
 package gen
 
 import (
-    "functure/internal/ast"
     "strings"
 )
 
