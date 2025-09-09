@@ -1,0 +1,20 @@
+{
+  "name": "Functure LSP Client",
+  "contributes": {
+    "languages": [{
+      "id": "functure",
+      "aliases": ["Functure"],
+      "extensions": [".pygb"],
+      "configuration": "./language-configuration.json"
+    }],
+    "configuration": {
+      "functure.lsp.server": {
+        "type": "string",
+        "default": "localhost:2087",
+        "description": "Functure LSP server address"
+      }
+    }
+  },
+  "activationEvents": ["onLanguage:functure"],
+  "main": "./client.js"
+}
