@@ -1,7 +1,6 @@
 package io
 
 import (
-    "os"
     "io/ioutil"
 )
 
