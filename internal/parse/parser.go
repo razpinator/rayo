@@ -72,13 +72,14 @@ func (p *Parser) ParseModule() *ast.Module {
         if p.tok.Kind == lex.TokenEOF {
             break
         }
+        // Handle imports
         if p.tok.Kind == lex.TokenKeyword && p.tok.Value == "import" {
             imp := p.parseImport()
             mod.Imports = append(mod.Imports, imp)
             continue
         }
-        // Try to parse a statement for any non-import, non-whitespace, non-EOF token
-        if p.tok.Kind != lex.TokenEOF && p.tok.Kind != lex.TokenWhitespace && !(p.tok.Kind == lex.TokenKeyword && p.tok.Value == "import") {
+        // Try to parse a statement
+        if p.tok.Kind != lex.TokenWhitespace {
             stmt := p.parseStmt()
             if stmt != nil {
                 mod.Body = append(mod.Body, stmt)
@@ -103,64 +104,38 @@ func (p *Parser) parseImport() *ast.Import {
 
 func (p *Parser) parseStmt() ast.Stmt {
     // Example: parse var statement
-    println("parseStmt: starting with token kind=", p.tok.Kind, "value=", p.tok.Value)
     if p.tok.Kind == lex.TokenKeyword && p.tok.Value == "var" {
-        println("parseStmt: found 'var' keyword")
-        println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         p.next()
-        println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         // Skip whitespace after 'var'
         for p.tok.Kind == lex.TokenWhitespace {
-            println("parseStmt: skipping whitespace: kind=", p.tok.Kind, "value=", p.tok.Value)
-            println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
             p.next()
-            println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         }
-        println("parseStmt: after whitespace, looking for identifier: kind=", p.tok.Kind, "value=", p.tok.Value)
         // Expect identifier
         if p.tok.Kind != lex.TokenIdent {
-            println("parseStmt: ERROR: expected identifier, got kind=", p.tok.Kind, "value=", p.tok.Value)
             err := &ParseError{Msg: "expected identifier after 'var'", Span: diag.Span{}, Expected: []string{"identifier"}, Excerpt: p.tok.Value}
             p.errors = append(p.errors, err)
             return nil
         }
-        println("parseStmt: found identifier: kind=", p.tok.Kind, "value=", p.tok.Value)
         nameTok := p.tok
-        println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         p.next()
-        println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         // Skip whitespace after identifier
         for p.tok.Kind == lex.TokenWhitespace {
-            println("parseStmt: skipping whitespace: kind=", p.tok.Kind, "value=", p.tok.Value)
-            println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
             p.next()
-            println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         }
-        println("parseStmt: after whitespace, looking for =: kind=", p.tok.Kind, "value=", p.tok.Value)
         // Expect '=' operator
         if p.tok.Kind != lex.TokenOp || p.tok.Value != "=" {
-            println("parseStmt: ERROR: expected '=', got kind=", p.tok.Kind, "value=", p.tok.Value)
             err := &ParseError{Msg: "expected '=' after variable name", Span: diag.Span{}, Expected: []string{"="}, Excerpt: p.tok.Value}
             p.errors = append(p.errors, err)
             return nil
         }
-        println("parseStmt: found =: kind=", p.tok.Kind, "value=", p.tok.Value)
-        println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         p.next()
-        println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         // Skip whitespace after '='
         for p.tok.Kind == lex.TokenWhitespace {
-            println("parseStmt: skipping whitespace: kind=", p.tok.Kind, "value=", p.tok.Value)
-            println("parseStmt: before next(): kind=", p.tok.Kind, "value=", p.tok.Value)
             p.next()
-            println("parseStmt: after next(): kind=", p.tok.Kind, "value=", p.tok.Value)
         }
-        println("parseStmt: after whitespace, looking for expression: kind=", p.tok.Kind, "value=", p.tok.Value)
         val := p.parseExpr()
-        println("parseStmt: parsed expression:", val)
         return &ast.VarStmt{Name: nameTok.Value, Value: val}
     }
-    println("parseStmt: not a 'var' statement: kind=", p.tok.Kind, "value=", p.tok.Value)
     p.next() // advance token if not a statement start
     // ...extend for other statements...
     return nil
