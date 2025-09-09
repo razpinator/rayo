@@ -33,7 +33,22 @@ func InferType(expr ast.Expr) Type {
             return &AnyType{}
         }
     case *ast.Name:
-        return &AnyType{} // Needs symbol table lookup
+        // Example: lookup in symbol table for null safety
+        // (symbol table logic would go here)
+        return &AnyType{}
+    case *ast.Attr:
+        // Disambiguate obj.attr vs obj["attr"]
+        // If Target is known struct, return field type; else dynamic
+        if bt, ok := InferType(e.Target).(*BasicType); ok && bt.Name == "struct" {
+            return &AnyType{} // Would be field type in real impl
+        }
+        return &AnyType{}
+    case *ast.Index:
+        // If Target is dict, return value type; else dynamic
+        if bt, ok := InferType(e.Target).(*BasicType); ok && bt.Name == "dict" {
+            return &AnyType{} // Would be value type in real impl
+        }
+        return &AnyType{}
     default:
         return &AnyType{}
     }

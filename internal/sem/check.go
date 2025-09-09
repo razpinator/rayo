@@ -85,6 +85,23 @@ func checkStmt(stmt ast.Stmt, scope *Scope) {
             checkStmt(stmt, scope)
         }
     case *ast.ExprStmt:
-        // Could check expression
+        checkExprNullSafety(s.Expr, scope)
+    }
+
+}
+
+// checkExprNullSafety checks for unsafe dereference and safe navigation.
+func checkExprNullSafety(expr ast.Expr, scope *Scope) {
+    switch e := expr.(type) {
+    case *ast.Attr:
+        typ := InferType(e.Target)
+        if opt, ok := typ.(*OptionalType); ok {
+            reporter.Report(diag.Span{}, "unsafe dereference of optional value")
+        }
+    case *ast.Index:
+        typ := InferType(e.Target)
+        if opt, ok := typ.(*OptionalType); ok {
+            reporter.Report(diag.Span{}, "unsafe index of optional value")
+        }
     }
 }
