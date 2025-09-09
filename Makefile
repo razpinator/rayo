@@ -13,3 +13,6 @@ lint:
 
 build:
 	go build ./...
+
+test-golden:
+	go test -run TestGolden ./internal/testutil
