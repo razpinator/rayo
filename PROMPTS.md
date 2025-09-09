@@ -100,6 +100,10 @@ Deliverables:
 
 
 ---
+Pending:
+Add full Python keyword support or integration with golden tests.
+
+---
 
 Goal: Define Go structs for AST nodes with source spans.
 
