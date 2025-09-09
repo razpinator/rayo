@@ -7,7 +7,7 @@ import (
 
 // Python keywords (subset for demo; use full list in production)
 var pythonKeywords = map[string]struct{}{
-    "if": {}, "elif": {}, "else": {}, "while": {}, "for": {}, "def": {}, "return": {}, "try": {}, "except": {}, "finally": {}, "None": {},
+    "if": {}, "elif": {}, "else": {}, "while": {}, "for": {}, "def": {}, "return": {}, "try": {}, "except": {}, "finally": {}, "None": {}, "import": {}, "var": {},
 }
 
 // Lexer holds state for lexing.
