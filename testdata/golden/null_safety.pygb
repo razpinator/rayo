@@ -1,0 +1,13 @@
+# Null safety: optional binding, unsafe deref errors, safe navigation
+def test_null_safety():
+    a = None
+    b = {'x': 42}
+    try:
+        unsafe = a['x']
+    except Exception as e:
+        unsafe = str(e)
+    safe = a['x'] if a and 'x' in a else None
+    safe_nav = b.get('x') if b else None
+    return unsafe, safe, safe_nav
+
+print(test_null_safety())

@@ -1,0 +1,11 @@
+# Dict literals/updates, obj.k vs obj["k"]
+def test_dict():
+    d = {'a': 1, 'b': 2}
+    d['c'] = 3
+    d['a'] += 10
+    x = d['b']
+    y = d.get('c')
+    z = d.get('missing', None)
+    return d['a'], d['c'], x, y, z
+
+print(test_dict())

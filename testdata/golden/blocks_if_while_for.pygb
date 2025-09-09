@@ -1,0 +1,18 @@
+# Curly-brace blocks, if/elif/else, while/for, def, return
+def test_blocks(x):
+    result = []
+    if x > 0:
+        result.append('positive')
+    elif x == 0:
+        result.append('zero')
+    else:
+        result.append('negative')
+    i = 0
+    while i < x:
+        result.append(i)
+        i += 1
+    for j in range(x):
+        result.append(j * 2)
+    return result
+
+print(test_blocks(2))

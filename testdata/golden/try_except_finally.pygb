@@ -1,0 +1,13 @@
+# try/except/finally semantics
+def test_try_except_finally():
+    log = []
+    try:
+        log.append('try')
+        raise ValueError('fail')
+    except ValueError as e:
+        log.append(f'except: {e}')
+    finally:
+        log.append('finally')
+    return log
+
+print(test_try_except_finally())
