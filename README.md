@@ -1,6 +1,10 @@
-# Functure
+# Rayo
 
-Functure is a readable, Python-inspired programming language that transpiles to Go. It emphasizes null safety, error handling, and clean syntax for building reliable applications.
+Rayo (read as rah-YOH) is a readable, Python-inspired programming language that transpiles to Golang. It emphasizes null safety, error handling, and clean syntax for building reliable applications.
+
+# Why Named Rayo?
+
+Raza's Python-inspired Language that transpiles to Golang :P
 
 ## Design Goals
 
@@ -23,7 +27,7 @@ Functure is a readable, Python-inspired programming language that transpiles to 
    go build -o functurec ./cmd/functurec
    ```
 
-3. Transpile a Functure file:
+3. Transpile a Rayo file:
    ```sh
    ./functurec transpile examples/web/api.pygb -o output.go
    ```
@@ -65,4 +69,4 @@ See `/examples/` for a cookbook of 10+ examples covering CLI tools, data process
 
 ## Contributing
 
-Functure is in active development. See the spec for implementation details.
+Rayo is in active development. See the spec for implementation details.

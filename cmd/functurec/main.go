@@ -16,7 +16,7 @@ var (
 func main() {
     var rootCmd = &cobra.Command{
         Use:   "functurec",
-        Short: "Functure Transpiler CLI",
+        Short: "Rayo Transpiler CLI",
     }
 
     rootCmd.PersistentFlags().StringSliceVarP(&includePaths, "include", "I", nil, "Include paths")

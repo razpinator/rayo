@@ -1,4 +1,4 @@
-# Functure Language Specification v1.0
+# Rayo Language Specification v1.0
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@
 
 ## Overview
 
-Functure is a statically-typed, null-safe programming language that combines Python's familiar syntax with Go's performance and safety guarantees. It transpiles directly to Go 1.22+ code.
+Rayo is a statically-typed, null-safe programming language that combines Python's familiar syntax with Go's performance and safety guarantees. It transpiles directly to Go 1.22+ code.
 
 ### Design Principles
 
@@ -389,7 +389,7 @@ class Container[T] {
 
 ### Types
 
-| Functure | Go |
+| Rayo | Go |
 |----------|-----|
 | `int` | `int64` |
 | `float` | `float64` |
@@ -403,7 +403,7 @@ class Container[T] {
 ### Null Safety
 
 ```functure
-// Functure
+// Rayo
 x: int? = None
 if x != None {
     print(x)
@@ -421,7 +421,7 @@ if x != nil {
 ### Safe Navigation
 
 ```functure
-// Functure
+// Rayo
 result := obj?.method()?.field
 ```
 
@@ -438,7 +438,7 @@ if obj != nil {
 ### Dictionary Access
 
 ```functure
-// Functure
+// Rayo
 d: dict[str, int] = {"a": 1}
 value := d["a"]
 ```
@@ -452,7 +452,7 @@ value := d["a"]  // Zero value if key doesn't exist
 ### Error Handling
 
 ```functure
-// Functure
+// Rayo
 try {
     risky()
 } except ValueError as e {
@@ -474,7 +474,7 @@ if err := risky(); err != nil {
 ### Classes
 
 ```functure
-// Functure
+// Rayo
 class Point {
     x: int
     y: int

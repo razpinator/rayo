@@ -1,6 +1,6 @@
-# Functure Lexer
+# Rayo Lexer
 
-- Deterministic, robust lexer for Functure language.
+- Deterministic, robust lexer for Rayo language.
 - Python keywords only.
 - Produces tokens with offset, line, col.
 - Ignores indentation.

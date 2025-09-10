@@ -1,4 +1,4 @@
-# Functure Core Library
+# Rayo Core Library
 
 ## Strings
 - `StrLen(s string) int` — Length of string

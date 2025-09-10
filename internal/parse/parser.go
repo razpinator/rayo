@@ -6,7 +6,7 @@ import (
     "functure/internal/diag"
 )
 
-// Parser implements a recursive-descent parser for Functure.
+// Parser implements a recursive-descent parser for Rayo.
 type Parser struct {
     lx    *lex.Lexer
     tok   lex.Token

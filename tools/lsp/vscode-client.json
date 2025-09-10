@@ -1,9 +1,9 @@
 {
-  "name": "Functure LSP Client",
+  "name": "Rayo LSP Client",
   "contributes": {
     "languages": [{
       "id": "functure",
-      "aliases": ["Functure"],
+      "aliases": ["Rayo"],
       "extensions": [".pygb"],
       "configuration": "./language-configuration.json"
     }],
@@ -11,7 +11,7 @@
       "functure.lsp.server": {
         "type": "string",
         "default": "localhost:2087",
-        "description": "Functure LSP server address"
+        "description": "Rayo LSP server address"
       }
     }
   },

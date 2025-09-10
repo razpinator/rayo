@@ -1,10 +1,10 @@
-# Functure Keywords Reference
+# Rayo Keywords Reference
 
-This document lists all reserved keywords in Functure, which are identical to Python's reserved keywords. These keywords cannot be used as identifiers (variable names, function names, class names, etc.).
+This document lists all reserved keywords in Rayo, which are identical to Python's reserved keywords. These keywords cannot be used as identifiers (variable names, function names, class names, etc.).
 
 ## Complete List of Reserved Keywords
 
-The following 35 keywords are reserved in Functure:
+The following 35 keywords are reserved in Rayo:
 
 ### Control Flow Keywords
 - `if` - Conditional statement
@@ -63,11 +63,11 @@ The following 35 keywords are reserved in Functure:
 - `async` - Asynchronous function definition (reserved)
 - `await` - Await asynchronous operation (reserved)
 
-## Keyword Usage in Functure
+## Keyword Usage in Rayo
 
 ### Currently Implemented
 
-The following keywords are actively used in Functure v1.0:
+The following keywords are actively used in Rayo v1.0:
 
 ```functure
 // Control flow
@@ -150,11 +150,11 @@ assert condition, "error message"
 
 ## Soft Keywords
 
-Unlike Python, Functure does not currently have soft keywords. All keywords in the above list are hard keywords and cannot be used as identifiers in any context.
+Unlike Python, Rayo does not currently have soft keywords. All keywords in the above list are hard keywords and cannot be used as identifiers in any context.
 
 ## Case Sensitivity
 
-All keywords in Functure are case-sensitive and must be written exactly as shown:
+All keywords in Rayo are case-sensitive and must be written exactly as shown:
 
 ```functure
 // Correct
@@ -189,7 +189,7 @@ def print(msg: str) {
 
 ### Parser Considerations
 
-When implementing a parser for Functure:
+When implementing a parser for Rayo:
 
 1. **Keyword Recognition**: Keywords should be recognized before identifier tokenization
 2. **Context Independence**: Keywords are recognized regardless of context
@@ -241,11 +241,11 @@ var keywords = map[string]TokenType{
 
 ## Migration from Python
 
-When porting Python code to Functure, be aware that:
+When porting Python code to Rayo, be aware that:
 
-1. All Python keywords remain keywords in Functure
+1. All Python keywords remain keywords in Rayo
 2. Some keywords may have slightly different semantics (documented in main spec)
 3. New syntax features use curly braces instead of indentation
 4. Type annotations are required where not inferred
 
-This maintains maximum compatibility with Python's keyword system while enabling the additional features that Functure provides.
+This maintains maximum compatibility with Python's keyword system while enabling the additional features that Rayo provides.

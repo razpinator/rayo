@@ -1,4 +1,4 @@
-# Functure Data Helpers
+# Rayo Data Helpers
 
 ## Functions
 - `Map(list, fn)` — Map over list

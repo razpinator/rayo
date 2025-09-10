@@ -18,7 +18,7 @@ func NewREPL() *REPL {
 
 func (r *REPL) Run() {
     reader := bufio.NewReader(os.Stdin)
-    fmt.Println("Functure REPL. Type :help for commands.")
+    fmt.Println("Rayo REPL. Type :help for commands.")
     for {
         fmt.Print("> ")
         line, err := reader.ReadString('\n')

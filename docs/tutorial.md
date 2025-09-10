@@ -1,6 +1,6 @@
 # Tutorial: Building a Web JSON API and ETL Pipeline
 
-This tutorial walks through building a simple web JSON API and a small ETL (Extract, Transform, Load) pipeline using Functure.
+This tutorial walks through building a simple web JSON API and a small ETL (Extract, Transform, Load) pipeline using Rayo.
 
 ## Part 1: Web JSON API
 

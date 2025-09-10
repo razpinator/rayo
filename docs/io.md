@@ -1,4 +1,4 @@
-# Functure I/O Helpers
+# Rayo I/O Helpers
 
 ## Files
 - `ReadText(path)` — Read file as string

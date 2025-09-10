@@ -1,5 +1,5 @@
 # Web JSON API
-# Demonstrates building a REST API with Functure
+# Demonstrates building a REST API with Rayo
 
 import "functure/stdlib/http"
 
