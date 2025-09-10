@@ -1,7 +1,7 @@
 # Simple Web Server
 # Demonstrates basic HTTP server
 
-import "functure/stdlib/http"
+import "rayo/stdlib/http"
 
 def main() {
     app = http.NewApp()

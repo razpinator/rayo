@@ -1,7 +1,7 @@
 package parse
 
 import (
-    "functure/internal/ast"
+    "rayo/internal/ast"
     "fmt"
     "strings"
 )

@@ -1,7 +1,7 @@
 # Data Processing with GroupBy
 # Demonstrates grouping data by a key
 
-import "functure/stdlib/data"
+import "rayo/stdlib/data"
 
 def main() {
     data = [

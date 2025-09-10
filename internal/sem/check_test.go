@@ -2,8 +2,8 @@ package sem
 
 import (
     "testing"
-    "functure/internal/ast"
-    "functure/internal/diag"
+    "rayo/internal/ast"
+    "rayo/internal/diag"
 )
 
 type testReporter struct {

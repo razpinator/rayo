@@ -11,7 +11,7 @@ We'll create a REST API that serves user data.
 Create `examples/web/api.pygb`:
 
 ```python
-import "functure/stdlib/http"
+import "rayo/stdlib/http"
 
 def main() {
     app = http.NewApp()
@@ -57,7 +57,7 @@ def main() {
 ### Step 2: Transpile and Run
 
 ```sh
-functurec transpile examples/web/api.pygb -o api.go
+rayoc transpile examples/web/api.pygb -o api.go
 go run api.go
 ```
 
@@ -78,8 +78,8 @@ We'll build a simple ETL that processes CSV data.
 Create `examples/data/etl.pygb`:
 
 ```python
-import "functure/stdlib/io"
-import "functure/stdlib/data"
+import "rayo/stdlib/io"
+import "rayo/stdlib/data"
 
 def main() {
     # Extract: Read CSV
@@ -106,7 +106,7 @@ def main() {
 ### Step 2: Run the ETL
 
 ```sh
-functurec transpile examples/data/etl.pygb -o etl.go
+rayoc transpile examples/data/etl.pygb -o etl.go
 go run etl.go
 ```
 

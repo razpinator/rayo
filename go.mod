@@ -1,4 +1,4 @@
-module functure
+module rayo
 
 go 1.22
 

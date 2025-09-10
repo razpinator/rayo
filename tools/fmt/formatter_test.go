@@ -2,7 +2,7 @@ package fmt
 
 import (
     "testing"
-    "functure/internal/lex"
+    "rayo/internal/lex"
 )
 
 func TestFormatTokens_Idempotent(t *testing.T) {

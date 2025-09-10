@@ -1,7 +1,7 @@
 package fmt
 
 import (
-    "functure/internal/lex"
+    "rayo/internal/lex"
     "strings"
 )
 

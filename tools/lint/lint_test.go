@@ -2,7 +2,7 @@ package lint
 
 import (
     "testing"
-    "functure/internal/ast"
+    "rayo/internal/ast"
 )
 
 func TestLintModule(t *testing.T) {

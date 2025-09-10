@@ -1,8 +1,8 @@
 package sem
 
 import (
-    "functure/internal/ast"
-    "functure/internal/diag"
+    "rayo/internal/ast"
+    "rayo/internal/diag"
 )
 
 // Scope represents a lexical scope.

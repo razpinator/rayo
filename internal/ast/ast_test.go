@@ -2,7 +2,7 @@ package ast
 
 import (
     "testing"
-    "functure/internal/diag"
+    "rayo/internal/diag"
 )
 
 func TestASTRoundTrip(t *testing.T) {

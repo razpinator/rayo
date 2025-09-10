@@ -1,7 +1,7 @@
 package main
 
 import (
-    "functure/stdlib/http"
+    "rayo/stdlib/http"
 )
 
 func main() {

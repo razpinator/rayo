@@ -69,7 +69,7 @@ The following 35 keywords are reserved in Rayo:
 
 The following keywords are actively used in Rayo v1.0:
 
-```functure
+```rayo
 // Control flow
 if condition { ... }
 elif other_condition { ... }
@@ -113,7 +113,7 @@ if obj1 is obj2 { ... }
 
 These keywords are reserved but not yet implemented:
 
-```functure
+```rayo
 // Module system (planned)
 import module_name
 from module_name import item
@@ -156,7 +156,7 @@ Unlike Python, Rayo does not currently have soft keywords. All keywords in the a
 
 All keywords in Rayo are case-sensitive and must be written exactly as shown:
 
-```functure
+```rayo
 // Correct
 if True { ... }
 def my_function() { ... }
@@ -178,7 +178,7 @@ Note the distinction between keywords and built-in functions:
 - `print()`, `len()`, `str()`, `int()`, `float()` - These are built-in functions
 - Can be shadowed (though not recommended)
 
-```functure
+```rayo
 // This is allowed but not recommended
 def print(msg: str) {
     // Custom print function shadows built-in

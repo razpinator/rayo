@@ -1,6 +1,6 @@
 package sem
 
-import "functure/internal/ast"
+import "rayo/internal/ast"
 
 // MustReturn checks if all paths in a function must return.
 func MustReturn(stmts []ast.Stmt) bool {

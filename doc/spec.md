@@ -265,14 +265,14 @@ dict_type = "dict" "[" type_annotation "," type_annotation "]"
 - Must be explicitly handled in optional types
 
 #### Optional Types
-```functure
+```rayo
 x: int? = None          // Optional int
 y: str? = "hello"       // Optional string with value
 z: int = None           // ERROR: Cannot assign None to non-optional
 ```
 
 #### Safe Navigation
-```functure
+```rayo
 obj?. attr              // Returns None if obj is None
 obj?["key"]             // Returns None if obj is None
 ```
@@ -285,7 +285,7 @@ obj?["key"]             // Returns None if obj is None
 2. **Bracket Access (`[]`)**: Always dictionary/list indexing
 3. **Safe Access (`?.`, `?[]`)**: Same rules but returns `None` if object is `None`
 
-```functure
+```rayo
 class Person {
     name: str
 }
@@ -300,7 +300,7 @@ d.name          // ERROR: dict has no 'name' attribute (unless dynamically added
 
 ### Error Handling
 
-```functure
+```rayo
 try {
     // Code that may raise exceptions
     risky_operation()
@@ -345,7 +345,7 @@ All other values evaluate to `True`.
 
 ### Built-in Types
 
-```functure
+```rayo
 // Basic types
 int: 64-bit signed integer
 float: 64-bit floating point  
@@ -363,7 +363,7 @@ T?: Optional type T (can be T or None)
 
 ### Type Inference
 
-```functure
+```rayo
 x := 42                 // Inferred as int
 y := "hello"            // Inferred as str
 z := [1, 2, 3]          // Inferred as list[int]
@@ -371,7 +371,7 @@ z := [1, 2, 3]          // Inferred as list[int]
 
 ### Generics
 
-```functure
+```rayo
 def identity[T](x: T) -> T {
     return x
 }
@@ -402,7 +402,7 @@ class Container[T] {
 
 ### Null Safety
 
-```functure
+```rayo
 // Rayo
 x: int? = None
 if x != None {
@@ -420,7 +420,7 @@ if x != nil {
 
 ### Safe Navigation
 
-```functure
+```rayo
 // Rayo
 result := obj?.method()?.field
 ```
@@ -437,7 +437,7 @@ if obj != nil {
 
 ### Dictionary Access
 
-```functure
+```rayo
 // Rayo
 d: dict[str, int] = {"a": 1}
 value := d["a"]
@@ -451,7 +451,7 @@ value := d["a"]  // Zero value if key doesn't exist
 
 ### Error Handling
 
-```functure
+```rayo
 // Rayo
 try {
     risky()
@@ -473,7 +473,7 @@ if err := risky(); err != nil {
 
 ### Classes
 
-```functure
+```rayo
 // Rayo
 class Point {
     x: int
@@ -510,7 +510,7 @@ func (p *Point) Distance() float64 {
 
 ### Basic Function
 
-```functure
+```rayo
 def fibonacci(n: int) -> int {
     if n <= 1 {
         return n
@@ -524,7 +524,7 @@ print(result)
 
 ### Null Safety Example
 
-```functure
+```rayo
 def safe_divide(a: int, b: int) -> float? {
     if b == 0 {
         return None
@@ -542,7 +542,7 @@ if result != None {
 
 ### Class with Error Handling
 
-```functure
+```rayo
 class BankAccount {
     balance: float
     
@@ -588,7 +588,7 @@ def main() {
 
 ### Dictionary and List Operations
 
-```functure
+```rayo
 def process_data() {
     // Dictionary operations
     scores: dict[str, int] = {
@@ -623,7 +623,7 @@ def process_data() {
 
 ### Generic Function
 
-```functure
+```rayo
 def find_max[T](items: list[T], compare: def(T, T) -> bool) -> T? {
     if len(items) == 0 {
         return None

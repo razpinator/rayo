@@ -3,7 +3,7 @@ package gen
 import (
     "testing"
     "strings"
-    "functure/internal/ast"
+    "rayo/internal/ast"
 )
 
 func TestEmitModule(t *testing.T) {

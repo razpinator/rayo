@@ -8,7 +8,7 @@ import (
 import (
 	"os"
 	"path/filepath"
-	"functure/internal/parse"
+	"rayo/internal/parse"
 )
 
 func BenchmarkCodegenLargeFile(b *testing.B) {

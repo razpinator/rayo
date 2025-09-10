@@ -1,6 +1,6 @@
 Using Golang, I want to develop a programming language.
 
-Goal: Write a precise language spec for “functure”.
+Goal: Write a precise language spec for “rayo”.
 
 Inputs:
 - Python’s reserved keywords (use ALL and ONLY these).
@@ -46,7 +46,7 @@ Deliverables:
 Goal: Scaffold Go modules and folders for a transpiler.
 
 Layout:
-- cmd/functurec/
+- cmd/rayoc/
 - internal/{lex,parse,ast,sem,gen,diag}
 - runtime/
 - stdlib/{core,http,data,io}
@@ -56,7 +56,7 @@ Layout:
 - docs/
 
 Deliverables:
-- go.mod, minimal main for functurec that prints help.
+- go.mod, minimal main for rayoc that prints help.
 - internal/diag with SourcePos, Span, Reporter.
 - Makefile or magefile with tasks: test, fmt, lint, build.
 
@@ -78,7 +78,7 @@ Deliverables:
 
 ---
 
-Goal: Implement a deterministic lexer for functure.
+Goal: Implement a deterministic lexer for rayo.
 
 Inputs:
 - Keywords: Python reserved words (only).
@@ -308,7 +308,7 @@ Deliverables:
 
 ---
 
-Goal: Build `functurec` with subcommands.
+Goal: Build `rayoc` with subcommands.
 
 Commands:
 - lex, parse, check, transpile, run, test
@@ -319,7 +319,7 @@ Behavior:
 - test: run golden tests.
 
 Deliverables:
-- /cmd/functurec/main.go
+- /cmd/rayoc/main.go
 - cobra or flag package; unit/integration tests.
 
 

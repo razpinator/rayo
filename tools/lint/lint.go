@@ -1,8 +1,8 @@
 package lint
 
 import (
-    "functure/internal/ast"
-    "functure/internal/sem"
+    "rayo/internal/ast"
+    "rayo/internal/sem"
 )
 
 type LintResult struct {

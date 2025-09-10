@@ -15,7 +15,7 @@ var (
 
 func main() {
     var rootCmd = &cobra.Command{
-        Use:   "functurec",
+        Use:   "rayoc",
         Short: "Rayo Transpiler CLI",
     }
 

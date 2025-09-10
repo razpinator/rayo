@@ -1,6 +1,6 @@
 package sem
 
-import "functure/internal/ast"
+import "rayo/internal/ast"
 
 // Type system for semantic analysis
 

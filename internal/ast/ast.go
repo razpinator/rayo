@@ -1,6 +1,6 @@
 package ast
 
-import "functure/internal/diag"
+import "rayo/internal/diag"
 
 // Node is the base interface for all AST nodes.
 type Node interface {

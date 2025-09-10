@@ -1,6 +1,6 @@
 package parse
 
-import "functure/internal/diag"
+import "rayo/internal/diag"
 
 // ParseError represents a parser error with diagnostics.
 type ParseError struct {

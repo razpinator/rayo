@@ -1,4 +1,4 @@
-# Makefile for functure project
+# Makefile for rayo project
 
 .PHONY: test fmt lint build
 

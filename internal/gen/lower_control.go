@@ -1,7 +1,7 @@
 package gen
 
 import (
-    "functure/internal/ast"
+    "rayo/internal/ast"
 )
 
 // LowerTryExcept lowers try/except/finally to Go error handling.

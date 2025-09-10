@@ -24,12 +24,12 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 2. Build the CLI:
    ```sh
-   go build -o functurec ./cmd/functurec
+   go build -o rayoc ./cmd/rayoc
    ```
 
 3. Transpile a Rayo file:
    ```sh
-   ./functurec transpile examples/web/api.pygb -o output.go
+   ./rayoc transpile examples/web/api.pygb -o output.go
    ```
 
 4. Run the generated Go code:
@@ -40,7 +40,7 @@ Raza's Python-inspired Language that transpiles to Golang :P
 ## CLI Usage
 
 ```sh
-functurec [command]
+rayoc [command]
 
 Available Commands:
   lex         Lex source file

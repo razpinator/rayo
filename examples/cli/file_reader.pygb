@@ -1,7 +1,7 @@
 # File Reader CLI
 # Demonstrates file I/O
 
-import "functure/stdlib/io"
+import "rayo/stdlib/io"
 
 def main() {
     if len(os.Args()) < 2 {

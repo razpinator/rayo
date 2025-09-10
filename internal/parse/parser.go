@@ -1,9 +1,9 @@
 package parse
 
 import (
-    "functure/internal/lex"
-    "functure/internal/ast"
-    "functure/internal/diag"
+    "rayo/internal/lex"
+    "rayo/internal/ast"
+    "rayo/internal/diag"
 )
 
 // Parser implements a recursive-descent parser for Rayo.
