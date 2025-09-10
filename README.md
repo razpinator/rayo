@@ -2,10 +2,6 @@
 
 Rayo (read as rah-YOH) is a readable, Python-inspired programming language that transpiles to Golang. It emphasizes null safety, error handling, and clean syntax for building reliable applications.
 
-# Why Named Rayo?
-
-Raza's Python-inspired Language that transpiles to Golang :P
-
 ## Design Goals
 
 - **Readability-first**: Python-like syntax with curly braces for blocks.
@@ -14,6 +10,10 @@ Raza's Python-inspired Language that transpiles to Golang :P
 - **Dicts and Objects**: Flexible data structures with attribute access.
 - **Transpilation**: Generates buildable Go 1.22+ code.
 - **Precise Spec**: Well-defined grammar and semantics.
+
+## Why Named Rayo?
+
+Raza's Python-inspired Language that transpiles to Golang :P
 
 ## Quickstart
 
@@ -61,7 +61,7 @@ See `/examples/` for a cookbook of 10+ examples covering CLI tools, data process
 
 ## Documentation
 
-- [Language Spec](/doc/spec.md)
+- [Language Spec](/docs/spec.md)
 - [Tutorial](/docs/tutorial.md)
 - [Core Features](/docs/core.md)
 - [Data Structures](/docs/data.md)
