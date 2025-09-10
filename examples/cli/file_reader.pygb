@@ -1,0 +1,15 @@
+# File Reader CLI
+# Demonstrates file I/O
+
+import "functure/stdlib/io"
+
+def main() {
+    if len(os.Args()) < 2 {
+        print("Usage: file_reader <filename>")
+        return
+    }
+    filename = os.Args()[1]
+    content = io.ReadFile(filename)
+    print("File content:")
+    print(content)
+}

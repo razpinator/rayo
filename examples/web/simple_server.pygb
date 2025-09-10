@@ -1,0 +1,18 @@
+# Simple Web Server
+# Demonstrates basic HTTP server
+
+import "functure/stdlib/http"
+
+def main() {
+    app = http.NewApp()
+
+    app.Get("/", func(ctx) {
+        ctx.Text(200, "Hello, World!")
+    })
+
+    app.Get("/time", func(ctx) {
+        ctx.Text(200, "Current time: " + str(time.Now()))
+    })
+
+    app.Listen(":3000")
+}

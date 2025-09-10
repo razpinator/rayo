@@ -1,0 +1,20 @@
+# Custom Error Types
+# Demonstrates raising and catching custom errors
+
+class MyError(Exception) {
+    def __init__(self, message) {
+        self.message = message
+    }
+}
+
+def risky_func() {
+    raise MyError("Custom error occurred")
+}
+
+def main() {
+    try {
+        risky_func()
+    } except MyError as e {
+        print("Caught custom error: " + e.message)
+    }
+}

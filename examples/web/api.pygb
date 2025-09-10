@@ -1,0 +1,18 @@
+# Web JSON API
+# Demonstrates building a REST API with Functure
+
+import "functure/stdlib/http"
+
+def main() {
+    app = http.NewApp()
+
+    users = {
+        "1": {"id": "1", "name": "Alice"}
+    }
+
+    app.Get("/users", func(ctx) {
+        ctx.JSON(200, users)
+    })
+
+    app.Listen(":8080")
+}

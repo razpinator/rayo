@@ -1,0 +1,18 @@
+# Null Safety
+# Demonstrates safe navigation and optionals
+
+def main() {
+    user = {"name": "Alice", "profile": None}
+
+    # Safe navigation
+    email = user?.profile?.email or "no email"
+
+    print("User email: " + email)
+
+    # Optional binding
+    if user?.profile != None {
+        print("Profile exists")
+    } else {
+        print("No profile")
+    }
+}

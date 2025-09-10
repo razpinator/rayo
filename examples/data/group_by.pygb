@@ -1,0 +1,19 @@
+# Data Processing with GroupBy
+# Demonstrates grouping data by a key
+
+import "functure/stdlib/data"
+
+def main() {
+    data = [
+        {"name": "Alice", "dept": "Engineering"},
+        {"name": "Bob", "dept": "Engineering"},
+        {"name": "Charlie", "dept": "Sales"},
+        {"name": "David", "dept": "Sales"}
+    ]
+
+    grouped = data.GroupBy(data, func(item) { return item["dept"] })
+
+    for dept, employees in grouped.items() {
+        print(dept + ": " + str(len(employees)) + " employees")
+    }
+}

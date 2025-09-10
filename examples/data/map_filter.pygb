@@ -1,0 +1,16 @@
+# Map and Filter
+# Demonstrates functional programming with data
+
+import "functure/stdlib/data"
+
+def main() {
+    numbers = [1, 2, 3, 4, 5]
+
+    # Filter even numbers
+    evens = data.Filter(numbers, func(n) { return n % 2 == 0 })
+
+    # Map to squares
+    squares = data.Map(evens, func(n) { return n * n })
+
+    print("Squares of evens: " + str(squares))
+}
