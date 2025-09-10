@@ -37,7 +37,7 @@ Coverage:
 - try/except/finally semantics.
 
 Deliverables:
-- /testdata/golden/*.pygb (source)
+- /testdata/golden/*.ryo (source)
 - /testdata/golden/*.out (expected stdout/behavior)
 
 
@@ -67,7 +67,7 @@ Deliverables:
 Goal: Build a golden-test harness.
 
 Behavior:
-- For each case: *.pygb source; expected tokens/AST/Go/out files optional.
+- For each case: *.ryo source; expected tokens/AST/Go/out files optional.
 - Subcommands: lex, parse, check, transpile, run.
 - Diff-friendly output.
 

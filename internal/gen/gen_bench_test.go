@@ -1,18 +1,14 @@
 package gen
 
 import (
-	"testing"
-)
-
-
-import (
 	"os"
 	"path/filepath"
 	"rayo/internal/parse"
+	"testing"
 )
 
 func BenchmarkCodegenLargeFile(b *testing.B) {
-	srcPath := filepath.Join("..", "..", "testdata", "golden", "blocks_if_while_for.pygb")
+	srcPath := filepath.Join("..", "..", "testdata", "golden", "blocks_if_while_for.ryo")
 	src, err := os.ReadFile(srcPath)
 	if err != nil {
 		b.Fatalf("failed to read source file: %v", err)

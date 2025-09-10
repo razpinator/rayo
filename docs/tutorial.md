@@ -8,7 +8,7 @@ We'll create a REST API that serves user data.
 
 ### Step 1: Define the API Structure
 
-Create `examples/web/api.pygb`:
+Create `examples/web/api.ryo`:
 
 ```python
 import "rayo/stdlib/http"
@@ -57,7 +57,7 @@ def main() {
 ### Step 2: Transpile and Run
 
 ```sh
-rayoc transpile examples/web/api.pygb -o api.go
+rayoc transpile examples/web/api.ryo -o api.go
 go run api.go
 ```
 
@@ -75,7 +75,7 @@ We'll build a simple ETL that processes CSV data.
 
 ### Step 1: Define the ETL Logic
 
-Create `examples/data/etl.pygb`:
+Create `examples/data/etl.ryo`:
 
 ```python
 import "rayo/stdlib/io"
@@ -106,7 +106,7 @@ def main() {
 ### Step 2: Run the ETL
 
 ```sh
-rayoc transpile examples/data/etl.pygb -o etl.go
+rayoc transpile examples/data/etl.ryo -o etl.go
 go run etl.go
 ```
 

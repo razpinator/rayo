@@ -4,7 +4,7 @@
     "languages": [{
       "id": "rayo",
       "aliases": ["Rayo"],
-      "extensions": [".pygb"],
+      "extensions": [".ryo"],
       "configuration": "./language-configuration.json"
     }],
     "configuration": {

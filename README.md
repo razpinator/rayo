@@ -29,7 +29,7 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 3. Transpile a Rayo file:
    ```sh
-   ./rayoc transpile examples/web/api.pygb -o output.go
+   ./rayoc transpile examples/web/api.ryo -o output.go
    ```
 
 4. Run the generated Go code:
