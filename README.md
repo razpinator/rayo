@@ -61,7 +61,7 @@ See `/examples/` for a cookbook of 10+ examples covering CLI tools, data process
 
 ## Documentation
 
-- [Language Spec](/docs/spec.md)
+- [Language Spec](/doc/spec.md)
 - [Tutorial](/docs/tutorial.md)
 - [Core Features](/docs/core.md)
 - [Data Structures](/docs/data.md)
