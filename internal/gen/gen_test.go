@@ -2,6 +2,7 @@ package gen
 
 import (
     "testing"
+    "strings"
     "functure/internal/ast"
 )
 
@@ -22,5 +23,5 @@ func TestEmitModule(t *testing.T) {
 }
 
 func contains(s, substr string) bool {
-    return len(s) >= len(substr) && (s == substr || contains(s[1:], substr))
+    return strings.Contains(s, substr)
 }

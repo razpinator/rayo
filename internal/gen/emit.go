@@ -11,8 +11,24 @@ func EmitModule(mod *ast.Module, ctx *GenContext) string {
     for _, imp := range mod.Imports {
         ctx.Code.WriteString(fmt.Sprintf("import \"%s\"\n", imp.Path))
     }
+    // Check if any top-level statement is a ReturnStmt
+    hasReturn := false
     for _, stmt := range mod.Body {
-        emitStmt(stmt, ctx)
+        if _, ok := stmt.(*ast.ReturnStmt); ok {
+            hasReturn = true
+            break
+        }
+    }
+    if hasReturn {
+        ctx.Code.WriteString("func main() {\n")
+        for _, stmt := range mod.Body {
+            emitStmt(stmt, ctx)
+        }
+        ctx.Code.WriteString("}\n")
+    } else {
+        for _, stmt := range mod.Body {
+            emitStmt(stmt, ctx)
+        }
     }
     return ctx.Code.String()
 }
