@@ -17,6 +17,38 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 ## Quickstart
 
+### Easy Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/razpinator/rayo.git
+   cd rayo
+   ```
+
+2. Install the transpiler:
+   ```sh
+   ./install.sh
+   ```
+
+3. Verify installation:
+   ```sh
+   rayoc version
+   ```
+
+4. Transpile a Rayo file:
+   ```sh
+   rayoc transpile examples/web/api.ryo -o output.go
+   ```
+
+5. Run the generated Go code:
+   ```sh
+   go run output.go
+   ```
+
+### Manual Build (Development)
+
+If you prefer to build manually:
+
 1. Install dependencies:
    ```sh
    go mod tidy
@@ -24,17 +56,12 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 2. Build the CLI:
    ```sh
-   go build -o rayoc ./cmd/rayoc
+   make build
    ```
 
-3. Transpile a Rayo file:
+3. Use the local binary:
    ```sh
-   ./rayoc transpile examples/web/api.ryo -o output.go
-   ```
-
-4. Run the generated Go code:
-   ```sh
-   go run output.go
+   ./build/rayoc transpile examples/web/api.ryo -o output.go
    ```
 
 ## CLI Usage
