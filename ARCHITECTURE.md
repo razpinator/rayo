@@ -119,7 +119,7 @@ Go Compiler → Executable
 
 ```text
 rayo/
-├── cmd/rayoc/          # Main CLI tool
+├── cmd/rayo/           # Main CLI tool
 ├── internal/           # Internal compiler packages
 │   ├── ast/           # Abstract Syntax Tree
 │   ├── diag/          # Diagnostics

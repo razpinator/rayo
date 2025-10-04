@@ -10,7 +10,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-BINARY_NAME="rayoc"
+BINARY_NAME="rayo"
 BUILD_DIR="build"
 INSTALL_DIR="/usr/local/bin"
 

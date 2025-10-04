@@ -57,7 +57,7 @@ def main() {
 ### Step 2: Transpile and Run
 
 ```sh
-rayoc transpile examples/web/api.ryo -o api.go
+rayo transpile examples/web/api.ryo -o api.go
 go run api.go
 ```
 
@@ -106,7 +106,7 @@ def main() {
 ### Step 2: Run the ETL
 
 ```sh
-rayoc transpile examples/data/etl.ryo -o etl.go
+rayo transpile examples/data/etl.ryo -o etl.go
 go run etl.go
 ```
 

@@ -42,12 +42,12 @@ done
 **Release Structure:**
 ```
 rayo-v1.0.0/
-├── rayoc-linux-amd64.tar.gz
-├── rayoc-linux-arm64.tar.gz
-├── rayoc-darwin-amd64.tar.gz
-├── rayoc-darwin-arm64.tar.gz
-├── rayoc-windows-amd64.zip
-├── rayoc-windows-arm64.zip
+├── rayo-linux-amd64.tar.gz
+├── rayo-linux-arm64.tar.gz
+├── rayo-darwin-amd64.tar.gz
+├── rayo-darwin-arm64.tar.gz
+├── rayo-windows-amd64.zip
+├── rayo-windows-arm64.zip
 ├── README.md
 └── CHANGELOG.md
 ```
@@ -60,16 +60,16 @@ rayo-v1.0.0/
 class Rayo < Formula
   desc "Rayo programming language"
   homepage "https://github.com/razpinator/rayo"
-  url "https://github.com/razpinator/rayo/releases/download/v1.0.0/rayoc-darwin-amd64.tar.gz"
+  url "https://github.com/razpinator/rayo/releases/download/v1.0.0/rayo-darwin-amd64.tar.gz"
   sha256 "YOUR_SHA256_HERE"
 
   def install
-    bin.install "rayoc"
+    bin.install "rayo"
   end
 
   test do
     (testpath/"hello.ryo").write 'print("Hello, World!")'
-    system "#{bin}/rayoc", "transpile", "hello.ryo"
+    system "#{bin}/rayo", "transpile", "hello.ryo"
   end
 end
 ```
@@ -101,15 +101,15 @@ grade: stable
 confinement: strict
 
 apps:
-  rayoc:
-    command: rayoc
+  rayo:
+    command: rayo
 
 parts:
   rayo:
     plugin: dump
-    source: https://github.com/razpinator/rayo/releases/download/v1.0.0/rayoc-linux-amd64.tar.gz
+    source: https://github.com/razpinator/rayo/releases/download/v1.0.0/rayo-linux-amd64.tar.gz
     organize:
-      rayoc: bin/rayoc
+      rayo: bin/rayo
 ```
 
 ### 3. Docker Distribution
@@ -118,8 +118,8 @@ parts:
 # Dockerfile
 FROM alpine:latest
 RUN apk add --no-cache ca-certificates
-COPY rayoc-linux-amd64 /usr/local/bin/rayoc
-ENTRYPOINT ["/usr/local/bin/rayoc"]
+COPY rayo-linux-amd64 /usr/local/bin/rayo
+ENTRYPOINT ["/usr/local/bin/rayo"]
 ```
 
 ```bash
@@ -148,8 +148,8 @@ aws s3 cp build/ s3://rayo-releases/ --recursive
 brew install razpinator/tap/rayo
 
 # Or manual download
-curl -L https://github.com/razpinator/rayo/releases/download/v1.0.0/rayoc-darwin-amd64.tar.gz | tar xz
-sudo mv rayoc /usr/local/bin/
+curl -L https://github.com/razpinator/rayo/releases/download/v1.0.0/rayo-darwin-amd64.tar.gz | tar xz
+sudo mv rayo /usr/local/bin/
 ```
 
 ### Linux
@@ -158,9 +158,9 @@ sudo mv rayoc /usr/local/bin/
 sudo snap install rayo --edge
 
 # Or manual download
-wget https://github.com/razpinator/rayo/releases/download/v1.0.0/rayoc-linux-amd64.tar.gz
-tar xzf rayoc-linux-amd64.tar.gz
-sudo mv rayoc /usr/local/bin/
+wget https://github.com/razpinator/rayo/releases/download/v1.0.0/rayo-linux-amd64.tar.gz
+tar xzf rayo-linux-amd64.tar.gz
+sudo mv rayo /usr/local/bin/
 ```
 
 ### Windows
@@ -169,7 +169,7 @@ sudo mv rayoc /usr/local/bin/
 choco install rayo
 
 # Or manual download
-# Download rayoc-windows-amd64.zip from releases
+# Download rayo-windows-amd64.zip from releases
 # Extract and add to PATH
 ```
 
@@ -201,7 +201,7 @@ jobs:
       - name: Create release archives
         run: |
           cd build
-          for file in rayoc-*; do
+          for file in rayo-*; do
             if [[ $file == *.exe ]]; then
               zip -j "$file.zip" "$file"
             else
@@ -261,9 +261,9 @@ For faster distribution:
 
 ```bash
 # Compress binaries
-upx --best build/rayoc-*
+upx --best build/rayo-*
 
 # Strip symbols
-go build -ldflags="-s -w" ./cmd/rayoc
+go build -ldflags="-s -w" ./cmd/rayo
 ```</content>
 <parameter name="filePath">/Users/razmax/Documents/dev/rayo/DISTRIBUTION.md

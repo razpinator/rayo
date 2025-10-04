@@ -32,12 +32,12 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 3. Verify installation:
    ```sh
-   rayoc version
+   rayo version
    ```
 
 4. Transpile a Rayo file:
    ```sh
-   rayoc transpile examples/web/api.ryo -o output.go
+   rayo transpile examples/web/api.ryo -o output.go
    ```
 
 5. Run the generated Go code:
@@ -61,13 +61,13 @@ If you prefer to build manually:
 
 3. Use the local binary:
    ```sh
-   ./build/rayoc transpile examples/web/api.ryo -o output.go
+   ./build/rayo transpile examples/web/api.ryo -o output.go
    ```
 
 ## CLI Usage
 
 ```sh
-rayoc [command]
+rayo [command]
 
 Available Commands:
   lex         Lex source file

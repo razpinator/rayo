@@ -46,7 +46,7 @@ Deliverables:
 Goal: Scaffold Go modules and folders for a transpiler.
 
 Layout:
-- cmd/rayoc/
+- cmd/rayo/
 - internal/{lex,parse,ast,sem,gen,diag}
 - runtime/
 - stdlib/{core,http,data,io}
@@ -56,7 +56,7 @@ Layout:
 - docs/
 
 Deliverables:
-- go.mod, minimal main for rayoc that prints help.
+- go.mod, minimal main for rayo that prints help.
 - internal/diag with SourcePos, Span, Reporter.
 - Makefile or magefile with tasks: test, fmt, lint, build.
 
@@ -308,7 +308,7 @@ Deliverables:
 
 ---
 
-Goal: Build `rayoc` with subcommands.
+Goal: Build `rayo` with subcommands.
 
 Commands:
 - lex, parse, check, transpile, run, test
@@ -319,7 +319,7 @@ Behavior:
 - test: run golden tests.
 
 Deliverables:
-- /cmd/rayoc/main.go
+- /cmd/rayo/main.go
 - cobra or flag package; unit/integration tests.
 
 
