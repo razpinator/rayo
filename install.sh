@@ -18,8 +18,37 @@ echo -e "${YELLOW}Installing Rayo Transpiler...${NC}"
 
 # Check if Go is installed
 if ! command -v go &> /dev/null; then
-    echo -e "${RED}Error: Go is not installed. Please install Go first.${NC}"
-    exit 1
+    echo -e "${YELLOW}Go is not installed.${NC}"
+    read -p "Would you like to install Go? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            if command -v brew &> /dev/null; then
+                echo "Installing Go via Homebrew..."
+                brew install go
+            else
+                echo -e "${RED}Error: Homebrew not found. Please install Go manually from https://go.dev/dl/${NC}"
+                exit 1
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            if command -v apt-get &> /dev/null; then
+                sudo apt-get update && sudo apt-get install -y golang-go
+            elif command -v yum &> /dev/null; then
+                sudo yum install -y golang
+            elif command -v dnf &> /dev/null; then
+                sudo dnf install -y golang
+            else
+                echo -e "${RED}Error: Package manager not found. Please install Go manually from https://go.dev/dl/${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}Error: Unsupported OS. Please install Go manually from https://go.dev/dl/${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${RED}Go is required to build Rayo. Exiting.${NC}"
+        exit 1
+    fi
 fi
 
 # Build the binary
