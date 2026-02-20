@@ -79,6 +79,14 @@ func collectModules(filename string, visited map[string]bool, functions *[]strin
 		return fmt.Errorf("parse errors in %s: %v", filename, parser.Errors())
 	}
 
+	// Check if this module uses print() which requires "fmt"
+	for _, stmt := range module.Body {
+		if gen.ContainsPrint(stmt) {
+			*imports = append(*imports, "fmt")
+			break
+		}
+	}
+
 	// Process imports first
 	for _, imp := range module.Imports {
 		*imports = append(*imports, imp.Path)
@@ -142,7 +150,7 @@ func transpileFile(inputFile string) error {
 	return nil
 }
 
-func runFile(inputFile string) error {
+func runFile(inputFile string, args []string) error {
 	// Generate a temporary Go file
 	tempGoFile := strings.TrimSuffix(inputFile, filepath.Ext(inputFile)) + "_temp.go"
 
@@ -167,7 +175,7 @@ func runFile(inputFile string) error {
 	}
 
 	// Run the Go code
-	cmd := exec.Command("go", "run", tempGoFile)
+	cmd := exec.Command("go", append([]string{"run", tempGoFile}, args...)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -221,9 +229,9 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{
 		Use:   "run [file]",
 		Short: "Transpile and run",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := runFile(args[0]); err != nil {
+			if err := runFile(args[0], args[1:]); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 				os.Exit(1)
 			}

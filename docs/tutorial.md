@@ -57,8 +57,7 @@ def main() {
 ### Step 2: Transpile and Run
 
 ```sh
-rayo transpile examples/web/api.ryo -o api.go
-go run api.go
+rayo run examples/web/api.ryo
 ```
 
 Test the API:
@@ -106,8 +105,7 @@ def main() {
 ### Step 2: Run the ETL
 
 ```sh
-rayo transpile examples/data/etl.ryo -o etl.go
-go run etl.go
+rayo run examples/data/etl.ryo
 ```
 
 ## Next Steps

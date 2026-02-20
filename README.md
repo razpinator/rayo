@@ -35,13 +35,14 @@ Raza's Python-inspired Language that transpiles to Golang :P
    rayo version
    ```
 
-4. Transpile a Rayo file:
+4. Run a Rayo file:
    ```sh
-   rayo transpile examples/web/api.ryo -o output.go
+   rayo run examples/web/api.ryo
    ```
 
-5. Run the generated Go code:
+5. (Optional) Transpile to Go manually:
    ```sh
+   rayo transpile examples/web/api.ryo -o output.go
    go run output.go
    ```
 
@@ -61,7 +62,7 @@ If you prefer to build manually:
 
 3. Use the local binary:
    ```sh
-   ./build/rayo transpile examples/web/api.ryo -o output.go
+   ./build/rayo run examples/web/api.ryo
    ```
 
 ## CLI Usage
@@ -73,6 +74,7 @@ Available Commands:
   lex         Lex source file
   parse       Parse source file
   check       Check semantics
+  run         Transpile and run
   transpile   Transpile to Go
 
 Flags:
