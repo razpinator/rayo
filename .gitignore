@@ -40,3 +40,4 @@ coverage.out
 # Environment files
 .env
 .env.*
+dist/

@@ -1,0 +1,80 @@
+# This file is an example for GoReleaser Pro features for Windows MSI creation.
+# https://goreleaser.com/customization/msi/
+
+version: 2
+
+project_name: rayo
+
+before:
+  hooks:
+    - go mod tidy
+    # You might want to run tests here too
+    # - go test ./...
+
+builds:
+  - id: rayo
+    main: ./cmd/rayo/main.go
+    binary: rayo
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+
+  - id: rayoc
+    main: ./cmd/rayoc/main.go
+    binary: rayoc
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+
+archives:
+  - format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of uname.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+    - goos: windows
+      format: zip
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: "{{ .Tag }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+# Windows MSI Installer Configuration (Pro Feature)
+msi:
+  - id: rayo_msi
+    name: "rayo_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    
+    # We use a custom wxs file
+    wxs: ./windows/rayo.wxs
+
+    # We specify both build IDs so that both binaries are available in the MSI build context.
+    ids:
+      - rayo
+      - rayoc
