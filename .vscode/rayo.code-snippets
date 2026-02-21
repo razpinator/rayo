@@ -1,0 +1,94 @@
+{
+  "Function definition": {
+    "prefix": "def",
+    "body": [
+      "def ${1:name}(${2:params}) {",
+      "    $0",
+      "}"
+    ],
+    "description": "Define a function",
+    "scope": "rayo"
+  },
+  "Main function": {
+    "prefix": "main",
+    "body": [
+      "def main() {",
+      "    $0",
+      "}"
+    ],
+    "description": "Entry point main()",
+    "scope": "rayo"
+  },
+  "If block": {
+    "prefix": "if",
+    "body": [
+      "if ${1:condition} {",
+      "    $0",
+      "}"
+    ],
+    "description": "If statement",
+    "scope": "rayo"
+  },
+  "If-elif-else": {
+    "prefix": "elif",
+    "body": [
+      "if ${1:condition} {",
+      "    $2",
+      "} elif ${3:condition} {",
+      "    $4",
+      "} else {",
+      "    $0",
+      "}"
+    ],
+    "description": "If / elif / else",
+    "scope": "rayo"
+  },
+  "For loop": {
+    "prefix": "for",
+    "body": [
+      "for ${1:item} in ${2:collection} {",
+      "    $0",
+      "}"
+    ],
+    "description": "For loop",
+    "scope": "rayo"
+  },
+  "While loop": {
+    "prefix": "while",
+    "body": [
+      "while ${1:condition} {",
+      "    $0",
+      "}"
+    ],
+    "description": "While loop",
+    "scope": "rayo"
+  },
+  "Try except": {
+    "prefix": "try",
+    "body": [
+      "try {",
+      "    $1",
+      "} except ${2:err} {",
+      "    $0",
+      "}"
+    ],
+    "description": "Try/except block",
+    "scope": "rayo"
+  },
+  "Import": {
+    "prefix": "import",
+    "body": [
+      "import \"${1:path}\""
+    ],
+    "description": "Import module",
+    "scope": "rayo"
+  },
+  "Print": {
+    "prefix": "print",
+    "body": [
+      "print(${1:value})"
+    ],
+    "description": "Print statement",
+    "scope": "rayo"
+  }
+}

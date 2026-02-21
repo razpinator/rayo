@@ -1,0 +1,67 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build",
+      "type": "shell",
+      "command": "make build",
+      "group": "build",
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "test",
+      "type": "shell",
+      "command": "go test ./...",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "lint",
+      "type": "shell",
+      "command": "make lint",
+      "group": "none",
+      "presentation": {
+        "reveal": "always"
+      }
+    },
+    {
+      "label": "fmt",
+      "type": "shell",
+      "command": "make fmt",
+      "group": "none",
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "run example (api.ryo)",
+      "type": "shell",
+      "command": "./build/rayo run examples/web/api.ryo",
+      "dependsOn": "build",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "run current .ryo file",
+      "type": "shell",
+      "command": "./build/rayo run ${file}",
+      "dependsOn": "build",
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

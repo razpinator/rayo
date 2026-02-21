@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Rayo CLI",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/rayo",
+      "args": [
+        "run",
+        "${workspaceFolder}/examples/web/api.ryo"
+      ]
+    },
+    {
+      "name": "Run Rayo CLI (current file)",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/rayo",
+      "args": [
+        "run",
+        "${file}"
+      ]
+    },
+    {
+      "name": "Transpile current .ryo",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/cmd/rayo",
+      "args": [
+        "transpile",
+        "${file}",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}.go"
+      ]
+    },
+    {
+      "name": "Debug Tests (current package)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug Tests (all)",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}",
+      "args": [
+        "./..."
+      ]
+    }
+  ]
+}

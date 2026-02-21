@@ -1,0 +1,27 @@
+{
+  "go.useLanguageServer": true,
+  "go.buildOnSave": "workspace",
+  "go.lintOnSave": "workspace",
+  "go.vetOnSave": "workspace",
+  "go.testFlags": [
+    "-v"
+  ],
+  "editor.formatOnSave": true,
+  "[go]": {
+    "editor.defaultFormatter": "golang.go",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "files.associations": {
+    "*.ryo": "rayo"
+  },
+  "files.trimTrailingWhitespace": true,
+  "editor.rulers": [
+    100
+  ],
+  "files.exclude": {
+    "**/.git": true,
+    "**/build": true
+  }
+}
