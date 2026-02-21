@@ -19,7 +19,7 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 ### Install (Linux & macOS)
 
-One command, same idea as [Rust](https://rustup.rs):
+One command:
 
 ```sh
 curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/razpinator/rayo/main/install.sh | sh
