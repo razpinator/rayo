@@ -1,5 +1,4 @@
-# This file is an example for GoReleaser Pro features for Windows MSI creation.
-# https://goreleaser.com/customization/msi/
+# https://goreleaser.com/customization/
 
 version: 2
 
@@ -17,7 +16,6 @@ builds:
     binary: rayo
     goos:
       - linux
-      - windows
       - darwin
     goarch:
       - amd64
@@ -30,7 +28,6 @@ builds:
     binary: rayoc
     goos:
       - linux
-      - windows
       - darwin
     goarch:
       - amd64
@@ -65,16 +62,3 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-
-# Windows MSI Installer Configuration (Pro Feature)
-msi:
-  - id: rayo_msi
-    name: "rayo_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    
-    # We use a custom wxs file
-    wxs: ./windows/rayo.wxs
-
-    # We specify both build IDs so that both binaries are available in the MSI build context.
-    ids:
-      - rayo
-      - rayoc

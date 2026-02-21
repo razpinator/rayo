@@ -22,31 +22,6 @@ jobs:
         with:
           go-version: stable
 
-      - name: Install msitools
-        run: |
-          sudo apt-get update
-          # Install msitools and potential dependencies explicitly
-          # Sometimes wixl is split or requires explicit installation
-          if apt-cache search wixl | grep -q "^wixl "; then
-            sudo apt-get install -y msitools wixl
-          else
-            sudo apt-get install -y msitools
-          fi
-          
-          # Debugging
-          echo "Listing /usr/bin/wixl*"
-          ls -l /usr/bin/wixl* || true
-          
-          # Verify installation
-          if ! command -v wixl &> /dev/null; then
-              echo "wixl still not found!"
-              echo "Searching for wixl binary in /usr..."
-              find /usr -name wixl -type f || true
-              exit 1
-          fi
-          echo "wixl found at $(which wixl)"
-          wixl --version
-          
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
