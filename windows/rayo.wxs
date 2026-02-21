@@ -9,20 +9,26 @@
             <Directory Id="ProgramFiles64Folder">
                 <Directory Id="INSTALLDIR" Name="{{ .ProjectName }}">
                     <Component Id="RayoBinary" Guid="87D5D89C-E829-436C-8EF3-6253093D7986">
-                        <File Id="RayoExe" Source="rayo.exe" KeyPath="yes" Checksum="yes"/>
-                        <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
+                        <File Id="RayoExe" Source="rayo.exe" KeyPath="yes" />
                     </Component>
                     <Component Id="RayocBinary" Guid="41E3687B-1643-494A-B926-A881AE5C8E59">
-                        <File Id="RayocExe" Source="rayoc.exe" KeyPath="yes" Checksum="yes"/>
+                        <File Id="RayocExe" Source="rayoc.exe" KeyPath="yes" />
                     </Component>
                 </Directory>
             </Directory>
         </Directory>
 
+        <DirectoryRef Id="TARGETDIR">
+             <Component Id="EnvPath" Guid="B649DF0A-ABCF-43A9-976D-5C1F50D2509A">
+                <Environment Id="PATH" Name="PATH" Value="[INSTALLDIR]" Permanent="no" Part="last" Action="set" System="yes" />
+             </Component>
+        </DirectoryRef>
+
         <!-- Features to install -->
         <Feature Id="MainFeature" Title="Rayo" Level="1">
             <ComponentRef Id="RayoBinary" />
             <ComponentRef Id="RayocBinary" />
+            <ComponentRef Id="EnvPath" />
         </Feature>
 
         <!-- UI -->
