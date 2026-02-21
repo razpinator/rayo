@@ -17,34 +17,39 @@ Raza's Python-inspired Language that transpiles to Golang :P
 
 ## Quickstart
 
-### Easy Installation
+### Install (Linux & macOS)
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/razpinator/rayo.git
-   cd rayo
-   ```
+One command, same idea as [Rust](https://rustup.rs):
 
-2. Install the transpiler:
-   ```sh
-   ./install.sh
-   ```
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/razpinator/rayo/main/install.sh | sh
+```
 
-3. Verify installation:
-   ```sh
-   rayo version
-   ```
+This installs the latest release to `~/.local/bin` (or `/usr/local/bin` if needed). Ensure that directory is in your `PATH`; the script will remind you if not.
 
-4. Run a Rayo file:
-   ```sh
-   rayo run examples/web/api.ryo
-   ```
+Verify:
 
-5. (Optional) Transpile to Go manually:
-   ```sh
-   rayo transpile examples/web/api.ryo -o output.go
-   go run output.go
-   ```
+```sh
+rayo version
+```
+
+### Run a Rayo file
+
+```sh
+rayo run examples/web/api.ryo
+```
+
+(Optional) Transpile to Go manually:
+
+```sh
+rayo transpile examples/web/api.ryo -o output.go
+go run output.go
+```
+
+### Other ways to install
+
+- **Manual download**: Get the right archive from [Releases](https://github.com/razpinator/rayo/releases) (e.g. `rayo_0.2.0_Linux_x86_64.tar.gz`), extract, and move `rayo` and `rayoc` to a directory in your `PATH`.
+- **From source**: Clone the repo, then run `./install-from-source.sh` (requires Go).
 
 ### Manual Build (Development)
 
