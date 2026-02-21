@@ -26,12 +26,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y msitools
-
+          # Verify installation
+          if ! command -v wixl &> /dev/null; then
+              echo "wixl not found! Listing contents of msitools package..."
+              dpkg -L msitools
+              echo "PATH is: $PATH"
+              exit 1
+          fi
+          echo "wixl found at $(which wixl)"
+          wixl --version
+          
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser-pro
-          version: latest
+          version: ~> v2
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
