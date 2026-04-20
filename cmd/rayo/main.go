@@ -10,6 +10,7 @@ import (
 
 	"rayo/internal/gen"
 	"rayo/internal/parse"
+	"rayo/tools/lsp"
 
 	"github.com/spf13/cobra"
 )
@@ -253,6 +254,22 @@ func main() {
 			fmt.Printf("rayo %s\n", version)
 			fmt.Printf("Commit: %s\n", commit)
 			fmt.Printf("Built: %s\n", date)
+		},
+	})
+	rootCmd.AddCommand(&cobra.Command{
+		Use:   "lsp [address]",
+		Short: "Run the Language Server Protocol server",
+		Long:  "Starts the LSP server for .ryo files. Default address is :2087 (used by the Rayo VS Code client).",
+		Args:  cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			addr := ":2087"
+			if len(args) > 0 {
+				addr = args[0]
+			}
+			if err := lsp.RunServer(addr); err != nil {
+				fmt.Fprintf(os.Stderr, "LSP server: %v\n", err)
+				os.Exit(1)
+			}
 		},
 	})
 

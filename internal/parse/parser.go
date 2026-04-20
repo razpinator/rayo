@@ -2,7 +2,6 @@ package parse
 
 import (
 	"rayo/internal/ast"
-	"rayo/internal/diag"
 	"rayo/internal/lex"
 	"strconv"
 )
@@ -35,7 +34,7 @@ func (p *Parser) parseFuncDef() ast.Stmt {
 
 	// Function name
 	if p.tok.Kind != lex.TokenIdent {
-		err := &ParseError{Msg: "expected function name", Span: diag.Span{}, Expected: []string{"identifier"}, Excerpt: p.tok.Value}
+		err := &ParseError{Msg: "expected function name", Span: TokenSpan(p.tok), Expected: []string{"identifier"}, Excerpt: p.tok.Value}
 		p.errors = append(p.errors, err)
 		return nil
 	}
@@ -50,7 +49,7 @@ func (p *Parser) parseFuncDef() ast.Stmt {
 
 	// Parameters '(' ... ')'
 	if p.tok.Kind != lex.TokenLParen {
-		err := &ParseError{Msg: "expected '(' after function name", Span: diag.Span{}, Expected: []string{"("}, Excerpt: p.tok.Value}
+		err := &ParseError{Msg: "expected '(' after function name", Span: TokenSpan(p.tok), Expected: []string{"("}, Excerpt: p.tok.Value}
 		p.errors = append(p.errors, err)
 		return nil
 	}
@@ -118,7 +117,7 @@ func (p *Parser) next() {
 
 func (p *Parser) expect(kind lex.TokenKind) lex.Token {
 	if p.tok.Kind != kind {
-		err := &ParseError{Msg: "unexpected token", Span: diag.Span{}, Expected: []string{kindToString(kind)}, Excerpt: p.tok.Value}
+		err := &ParseError{Msg: "unexpected token", Span: TokenSpan(p.tok), Expected: []string{kindToString(kind)}, Excerpt: p.tok.Value}
 		p.errors = append(p.errors, err)
 	}
 	tok := p.tok

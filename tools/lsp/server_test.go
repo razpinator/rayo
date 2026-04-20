@@ -2,9 +2,40 @@ package lsp
 
 import (
 	"net"
+	"strings"
 	"testing"
 	"time"
 )
+
+func TestInitializeResult(t *testing.T) {
+	result := handleInitialize()
+	if result.Capabilities.HoverProvider != true {
+		t.Error("expected hoverProvider true")
+	}
+	if result.Capabilities.DefinitionProvider != true {
+		t.Error("expected definitionProvider true")
+	}
+	if result.ServerInfo.Name != "rayo" {
+		t.Errorf("expected server name rayo, got %q", result.ServerInfo.Name)
+	}
+}
+
+func TestGetDiagnostics(t *testing.T) {
+	// Valid code: no errors
+	diags := getDiagnostics("file:///test.ryo", `import "fmt"
+def main() {
+    print(1)
+}`)
+	if len(diags) != 0 {
+		t.Errorf("expected no diagnostics for valid code, got %d: %v", len(diags), diags)
+	}
+
+	// Invalid: missing function name after def
+	diags = getDiagnostics("file:///bad.ryo", "def ()\n{ }")
+	if len(diags) < 1 {
+		t.Errorf("expected at least one diagnostic for invalid code, got %d", len(diags))
+	}
+}
 
 func TestRunServer(t *testing.T) {
 	// Test that the server can start and accept connections
@@ -47,9 +78,11 @@ func TestRunServer(t *testing.T) {
 		t.Errorf("Received empty response")
 	}
 
-	// The server currently just responds with "not implemented", so we check for that
-	expected := `{"result":"not implemented"}`
-	if response != expected+"\n" && response != expected+"\r\n" {
-		t.Errorf("Unexpected response: got %q, want %q", response, expected)
+	// Server responds with initialize result (capabilities)
+	if response == "" {
+		t.Errorf("Received empty response")
+	}
+	if !strings.Contains(response, "hoverProvider") {
+		t.Errorf("Expected initialize result with capabilities; got %q", response)
 	}
 }
