@@ -72,7 +72,7 @@ Behavior:
 - Diff-friendly output.
 
 Deliverables:
-- /internal/testutil/golden.go
+- /golden/golden.go
 - make test-golden
 
 

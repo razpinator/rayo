@@ -1,9 +1,11 @@
 package parse
 
 import (
+	"fmt"
+	"strconv"
+
 	"rayo/internal/ast"
 	"rayo/internal/lex"
-	"strconv"
 )
 
 // Parser implements a recursive-descent parser for Rayo.
@@ -384,4 +386,20 @@ func (p *Parser) parsePrimary() ast.Expr {
 	}
 
 	return expr
+}
+
+// ParseExpr parses a single expression from source (for example REPL :type).
+func ParseExpr(src string) (ast.Expr, []error) {
+	p := NewParser(src)
+	expr := p.parseExpr()
+	for p.tok.Kind == lex.TokenWhitespace {
+		p.next()
+	}
+	if p.tok.Kind != lex.TokenEOF {
+		p.errors = append(p.errors, fmt.Errorf("unexpected trailing input %q", p.tok.Value))
+	}
+	if expr == nil && len(p.errors) == 0 {
+		p.errors = append(p.errors, fmt.Errorf("expected expression"))
+	}
+	return expr, p.errors
 }

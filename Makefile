@@ -60,7 +60,7 @@ clean:
 
 # Development helpers
 test-golden:
-	go test -run TestGolden ./internal/testutil
+	go test -run TestGolden ./golden
 
 install: build
 	cp $(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/

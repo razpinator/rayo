@@ -1,0 +1,3 @@
+def forty() {
+  return 40
+}

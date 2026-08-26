@@ -40,3 +40,4 @@ coverage.out
 .env
 .env.*
 dist/
+plan.md

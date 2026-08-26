@@ -59,7 +59,8 @@ func EmitModule(mod *ast.Module, ctx *GenContext) string {
 func EmitStmt(stmt ast.Stmt, ctx *GenContext) {
 	switch s := stmt.(type) {
 	case *ast.FuncDef:
-		ctx.Code.WriteString(fmt.Sprintf("func %s() {\n", s.Name))
+		// Rayo is expression-oriented; use `any` so `return expr` is valid Go.
+		ctx.Code.WriteString(fmt.Sprintf("func %s() any {\n", s.Name))
 		for _, bodyStmt := range s.Body {
 			EmitStmt(bodyStmt, ctx)
 		}

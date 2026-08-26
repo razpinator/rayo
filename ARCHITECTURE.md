@@ -120,6 +120,7 @@ Go Compiler → Executable
 ```text
 rayo/
 ├── cmd/rayo/           # Main CLI tool
+├── golden/             # Golden test harness (shared with `rayo test`)
 ├── internal/           # Internal compiler packages
 │   ├── ast/           # Abstract Syntax Tree
 │   ├── diag/          # Diagnostics
@@ -127,7 +128,7 @@ rayo/
 │   ├── lex/           # Lexer
 │   ├── parse/         # Parser
 │   ├── sem/           # Semantic analysis
-│   └── testutil/      # Testing utilities
+│   └── compile/       # Multi-file compile, import graph, main() lowering
 ├── runtime/           # Runtime libraries
 │   ├── core/
 │   ├── dict/
