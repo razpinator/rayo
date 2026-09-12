@@ -101,6 +101,30 @@ See `/examples/` for a cookbook of 10+ examples covering CLI tools, data process
 - [Data Structures](/docs/data.md)
 - [I/O Operations](/docs/io.md)
 
+## Testing
+
+Run the full suite:
+
+```sh
+go test ./...
+```
+
+Golden fixtures live in `testdata/golden/`. Each `<name>.ryo` can carry sidecar
+expectations: `.tokens`, `.ast`, `.go`, `.out`, and `.diags`. A `.diags` sidecar
+snapshots the diagnostics of a "bad" program as `line:col: severity: message`
+(one per line, sorted by position), covering both parse errors and semantic
+warnings such as unused variables. `rayo test [filter]` runs the same harness.
+
+Lexer and parser fuzz targets seed from the golden sources:
+
+```sh
+go test ./internal/lex   -run x -fuzz FuzzLexerRoundTrip  -fuzztime 15s
+go test ./internal/parse -run x -fuzz FuzzParserRoundTrip -fuzztime 15s
+```
+
+See [ARCHITECTURE.md](/ARCHITECTURE.md) for the shared diagnostics/source-span
+model used across the lexer, parser, semantic analysis, and LSP.
+
 ## Contributing
 
 Rayo is in active development. See the spec for implementation details.

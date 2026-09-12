@@ -397,33 +397,48 @@ func getDiagnostics(uri string, content string) []Diagnostic {
 			})
 		}
 	}
-	var semDiags []struct {
-		span diag.Span
-		msg  string
-	}
-	rep := &collectingReporter{diags: &semDiags}
+	rep := &collectingReporter{}
 	sem.CheckModule(mod, rep)
-	for _, d := range semDiags {
-		r := spanToLSPRange(d.span)
-		sev := 2 // Warning (e.g. unused)
-		if len(d.msg) > 0 && d.msg[0] != 'u' {
-			sev = 1
-		}
-		out = append(out, Diagnostic{Range: r, Message: d.msg, Severity: sev, Source: "rayo"})
+	for _, d := range rep.diags {
+		out = append(out, Diagnostic{
+			Range:    spanToLSPRange(d.span),
+			Message:  d.msg,
+			Severity: lspSeverity(d.sev),
+			Source:   "rayo",
+		})
 	}
 	return out
 }
 
-type collectingReporter struct {
-	diags *[]struct {
-		span diag.Span
-		msg  string
+// lspSeverity maps a diag.Severity to the LSP DiagnosticSeverity numbering
+// (1=Error, 2=Warning, 3=Information, 4=Hint).
+func lspSeverity(s diag.Severity) int {
+	switch s {
+	case diag.SeverityWarning:
+		return 2
+	case diag.SeverityInfo:
+		return 3
+	default:
+		return 1
 	}
 }
 
+type semDiag struct {
+	span diag.Span
+	sev  diag.Severity
+	msg  string
+}
+
+// collectingReporter implements diag.SeverityReporter so severities set by the
+// semantic checker are preserved instead of being guessed from message text.
+type collectingReporter struct {
+	diags []semDiag
+}
+
 func (c *collectingReporter) Report(span diag.Span, msg string) {
-	*c.diags = append(*c.diags, struct {
-		span diag.Span
-		msg  string
-	}{span, msg})
+	c.ReportAt(span, diag.SeverityError, msg)
+}
+
+func (c *collectingReporter) ReportAt(span diag.Span, sev diag.Severity, msg string) {
+	c.diags = append(c.diags, semDiag{span: span, sev: sev, msg: msg})
 }

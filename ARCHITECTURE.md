@@ -107,6 +107,60 @@ Code Generation → Go Code
 Go Compiler → Executable
 ```
 
+## Diagnostics and Source Spans
+
+All compiler phases share one position model defined in `internal/diag`:
+
+- `diag.SourcePos` — byte `Offset`, 1-based `Line`, 1-based `Col`.
+- `diag.Span` — a `Start`/`End` pair. `Span.IsZero()` reports an unset span.
+- `diag.Severity` — `SeverityError`, `SeverityWarning`, or `SeverityInfo`.
+- `diag.Reporter` — the minimal sink (`Report(span, msg)`); reporters that care
+  about severity implement `diag.SeverityReporter` and receive `ReportAt(span, sev, msg)`.
+  Callers use the free function `diag.ReportAt(rep, span, sev, msg)`, which
+  preserves severity when the reporter supports it and falls back to `Report`
+  otherwise.
+
+How positions flow through the pipeline:
+
+1. The **lexer** records the *start* line/col and byte offset of every token.
+   Multi-character tokens (identifiers, numbers, strings, operators) report the
+   column where the token begins.
+2. `parse.TokenSpan` turns a token into a `diag.Span`, deriving the end position
+   from the token value (correctly handling multi-line string literals).
+   `parse.MergeSpans` combines two spans into the smallest covering span.
+3. The **parser** attaches spans to AST nodes via `ast.SetSpan` (every node
+   implements `ast.SpanSetter`), so leaf nodes carry their token span and
+   compound nodes span from their first to last child.
+4. **Semantic analysis** reports through `diag.ReportAt` using the offending
+   node's `Span()`, so unused-variable warnings and null-safety errors point at
+   real source ranges with the right severity.
+5. The **LSP server** maps `diag.Span` to LSP ranges (1-based → 0-based) and
+   maps `diag.Severity` to LSP severities (Error/Warning/Information) directly,
+   without guessing from message text.
+
+## Testing: Golden Harness and Fuzzing
+
+The golden harness (`golden/`, driven by `rayo test` and `go test ./golden`)
+loads fixtures from `testdata/golden/`. Each `<name>.ryo` may have sidecars:
+
+- `<name>.tokens` — expected token dump (`Kind "value"` per line).
+- `<name>.ast` — expected pretty-printed AST.
+- `<name>.go` — expected generated Go source.
+- `<name>.out` — expected stdout after transpile + `go run`.
+- `<name>.diags` — expected diagnostics for a "bad" program. When present, the
+  harness tolerates parse errors and compares a stable dump of parser +
+  semantic diagnostics formatted as `line:col: severity: message`, sorted by
+  position. This is how negative cases (e.g. `expected function name`) and
+  advisory warnings (e.g. `unused variable`) are snapshotted.
+
+A `.ryo` with no sidecars is smoke-compiled only.
+
+The lexer and parser fuzz targets (`FuzzLexerRoundTrip`, `FuzzParserRoundTrip`)
+seed their corpora from the inline seeds *and* every `testdata/golden/*.ryo`
+source, and assert invariants (valid token positions, consistent node spans) in
+addition to crash-freedom. Run them with, for example,
+`go test ./internal/parse -run x -fuzz FuzzParserRoundTrip -fuzztime 15s`.
+
 ## Key Design Decisions
 
 - **Transpilation Approach**: Rayo compiles to Go rather than having its own runtime, leveraging Go's performance and ecosystem

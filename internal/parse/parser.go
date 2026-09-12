@@ -27,6 +27,7 @@ func (p *Parser) Errors() []error {
 }
 
 func (p *Parser) parseFuncDef() ast.Stmt {
+	kwTok := p.tok
 	p.expect(lex.TokenKeyword) // 'def'
 
 	// Skip whitespace
@@ -42,6 +43,7 @@ func (p *Parser) parseFuncDef() ast.Stmt {
 	}
 
 	name := p.tok.Value
+	nameTok := p.tok
 	p.next()
 
 	// Skip whitespace
@@ -75,11 +77,13 @@ func (p *Parser) parseFuncDef() ast.Stmt {
 	body := p.parseBlock()
 
 	// Return a basic function definition
-	return &ast.FuncDef{
+	fn := &ast.FuncDef{
 		Name:   name,
 		Params: []*ast.Param{}, // Empty for now
 		Body:   body,
 	}
+	fn.SetSpan(MergeSpans(TokenSpan(kwTok), TokenSpan(nameTok)))
+	return fn
 }
 
 func (p *Parser) parseBlock() []ast.Stmt {
@@ -180,13 +184,16 @@ func (p *Parser) ParseModule() *ast.Module {
 }
 
 func (p *Parser) parseImport() *ast.Import {
+	kwTok := p.tok
 	p.expect(lex.TokenKeyword) // 'import'
 	pathTok := p.expect(lex.TokenString)
 	val := pathTok.Value
 	if len(val) >= 2 && (val[0] == '\'' || val[0] == '"') && val[len(val)-1] == val[0] {
 		val = val[1 : len(val)-1]
 	}
-	return &ast.Import{Path: val}
+	imp := &ast.Import{Path: val}
+	imp.SetSpan(MergeSpans(TokenSpan(kwTok), TokenSpan(pathTok)))
+	return imp
 }
 
 func (p *Parser) parseStmt() ast.Stmt {
@@ -206,6 +213,7 @@ func (p *Parser) parseStmt() ast.Stmt {
 
 	// Return statement
 	if p.tok.Kind == lex.TokenKeyword && p.tok.Value == "return" {
+		kwSpan := TokenSpan(p.tok)
 		p.next()
 		var val ast.Expr
 		// If next token is not newline/semicolon/RBrace, parse expression
@@ -213,11 +221,18 @@ func (p *Parser) parseStmt() ast.Stmt {
 		if p.tok.Kind != lex.TokenRBrace && p.tok.Kind != lex.TokenEOF {
 			val = p.parseExpr()
 		}
-		return &ast.ReturnStmt{Value: val}
+		ret := &ast.ReturnStmt{Value: val}
+		if val != nil {
+			ret.SetSpan(MergeSpans(kwSpan, val.Span()))
+		} else {
+			ret.SetSpan(kwSpan)
+		}
+		return ret
 	}
 
 	// If statement
 	if p.tok.Kind == lex.TokenKeyword && p.tok.Value == "if" {
+		kwSpan := TokenSpan(p.tok)
 		p.next()
 		cond := p.parseExpr()
 		body := p.parseBlock()
@@ -231,11 +246,18 @@ func (p *Parser) parseStmt() ast.Stmt {
 			p.next()
 			elseBody = p.parseBlock()
 		}
-		return &ast.IfStmt{Cond: cond, Then: body, Else: elseBody}
+		ifStmt := &ast.IfStmt{Cond: cond, Then: body, Else: elseBody}
+		if cond != nil {
+			ifStmt.SetSpan(MergeSpans(kwSpan, cond.Span()))
+		} else {
+			ifStmt.SetSpan(kwSpan)
+		}
+		return ifStmt
 	}
 
 	// Var statement (if kept)
 	if p.tok.Kind == lex.TokenKeyword && p.tok.Value == "var" {
+		kwSpan := TokenSpan(p.tok)
 		p.next()
 		// Expect identifier
 		if p.tok.Kind != lex.TokenIdent {
@@ -249,7 +271,13 @@ func (p *Parser) parseStmt() ast.Stmt {
 		}
 		p.next()
 		val := p.parseExpr()
-		return &ast.VarStmt{Name: nameTok.Value, Value: val}
+		varStmt := &ast.VarStmt{Name: nameTok.Value, Value: val}
+		if val != nil {
+			varStmt.SetSpan(MergeSpans(kwSpan, val.Span()))
+		} else {
+			varStmt.SetSpan(MergeSpans(kwSpan, TokenSpan(nameTok)))
+		}
+		return varStmt
 	}
 
 	// Assignment or Expression Statement
@@ -269,11 +297,17 @@ func (p *Parser) parseStmt() ast.Stmt {
 	if p.tok.Kind == lex.TokenOp && p.tok.Value == "=" {
 		p.next()
 		rhs := p.parseExpr()
-		return &ast.AssignStmt{Target: expr, Value: rhs}
+		assign := &ast.AssignStmt{Target: expr, Value: rhs}
+		if rhs != nil {
+			assign.SetSpan(MergeSpans(expr.Span(), rhs.Span()))
+		} else {
+			assign.SetSpan(expr.Span())
+		}
+		return assign
 	}
 
 	// Otherwise it's an expression statement
-	return &ast.ExprStmt{Expr: expr}
+	return ast.SetSpan(&ast.ExprStmt{Expr: expr}, expr.Span())
 }
 
 func (p *Parser) parseExpr() ast.Expr {
@@ -286,7 +320,11 @@ func (p *Parser) parseComparison() ast.Expr {
 		op := p.tok.Value
 		p.next()
 		right := p.parseTerm()
-		expr = &ast.BinaryOp{Op: op, Left: expr, Right: right}
+		bin := &ast.BinaryOp{Op: op, Left: expr, Right: right}
+		if expr != nil && right != nil {
+			bin.SetSpan(MergeSpans(expr.Span(), right.Span()))
+		}
+		expr = bin
 	}
 	return expr
 }
@@ -298,7 +336,11 @@ func (p *Parser) parseTerm() ast.Expr {
 		op := p.tok.Value
 		p.next()
 		right := p.parsePrimary()
-		expr = &ast.BinaryOp{Op: op, Left: expr, Right: right}
+		bin := &ast.BinaryOp{Op: op, Left: expr, Right: right}
+		if expr != nil && right != nil {
+			bin.SetSpan(MergeSpans(expr.Span(), right.Span()))
+		}
+		expr = bin
 	}
 	return expr
 }
@@ -311,7 +353,7 @@ func (p *Parser) parsePrimary() ast.Expr {
 		tok := p.tok
 		p.next()
 		i, _ := strconv.Atoi(tok.Value)
-		expr = &ast.Literal{Value: i}
+		expr = ast.SetSpan(&ast.Literal{Value: i}, TokenSpan(tok))
 	case lex.TokenString:
 		tok := p.tok
 		val := tok.Value
@@ -320,11 +362,11 @@ func (p *Parser) parsePrimary() ast.Expr {
 			val = val[1 : len(val)-1]
 		}
 		p.next()
-		expr = &ast.Literal{Value: val}
+		expr = ast.SetSpan(&ast.Literal{Value: val}, TokenSpan(tok))
 	case lex.TokenIdent:
 		tok := p.tok
 		p.next()
-		expr = &ast.Name{Ident: tok.Value}
+		expr = ast.SetSpan(&ast.Name{Ident: tok.Value}, TokenSpan(tok))
 	case lex.TokenLParen:
 		p.next()
 		expr = p.parseExpr()
@@ -345,6 +387,7 @@ func (p *Parser) parsePrimary() ast.Expr {
 	for {
 		if p.tok.Kind == lex.TokenLParen {
 			// Call
+			base := expr
 			p.next()
 			var args []ast.Expr
 			if p.tok.Kind != lex.TokenRParen {
@@ -360,25 +403,41 @@ func (p *Parser) parsePrimary() ast.Expr {
 					}
 				}
 			}
+			closeSpan := TokenSpan(p.tok)
 			if p.tok.Kind == lex.TokenRParen {
 				p.next()
 			}
-			expr = &ast.Call{Func: expr, Args: args}
+			call := &ast.Call{Func: base, Args: args}
+			if base != nil {
+				call.SetSpan(MergeSpans(base.Span(), closeSpan))
+			}
+			expr = call
 		} else if p.tok.Kind == lex.TokenLBracket {
 			// Index
+			base := expr
 			p.next()
 			idx := p.parseExpr()
+			closeSpan := TokenSpan(p.tok)
 			if p.tok.Kind == lex.TokenRBracket {
 				p.next()
 			}
-			expr = &ast.Index{Target: expr, Index: idx}
+			ix := &ast.Index{Target: base, Index: idx}
+			if base != nil {
+				ix.SetSpan(MergeSpans(base.Span(), closeSpan))
+			}
+			expr = ix
 		} else if p.tok.Kind == lex.TokenDot {
 			// Attribute or Method Call
+			base := expr
 			p.next()
 			if p.tok.Kind == lex.TokenIdent {
-				attrName := p.tok.Value
+				attrTok := p.tok
 				p.next()
-				expr = &ast.Attr{Target: expr, Attr: attrName}
+				attr := &ast.Attr{Target: base, Attr: attrTok.Value}
+				if base != nil {
+					attr.SetSpan(MergeSpans(base.Span(), TokenSpan(attrTok)))
+				}
+				expr = attr
 			}
 		} else {
 			break

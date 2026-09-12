@@ -1,0 +1,2 @@
+print(config.name)
+print(data["name"])

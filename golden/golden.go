@@ -7,11 +7,15 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"rayo/internal/ast"
 	"rayo/internal/compile"
+	"rayo/internal/diag"
 	"rayo/internal/lex"
 	"rayo/internal/parse"
+	"rayo/internal/sem"
 )
 
 // GoldenCase is one testdata/golden/<name>.ryo fixture and optional sidecars.
@@ -39,7 +43,7 @@ func LoadGoldenCases(dir string) ([]GoldenCase, error) {
 			return nil, err
 		}
 		expect := map[string]string{}
-		for _, ext := range []string{".out", ".tokens", ".ast", ".go"} {
+		for _, ext := range []string{".out", ".tokens", ".ast", ".go", ".diags"} {
 			outPath := filepath.Join(dir, base+ext)
 			if st, err := os.Stat(outPath); err == nil && !st.IsDir() {
 				b, _ := os.ReadFile(outPath)
@@ -80,6 +84,69 @@ func Diff(expected, actual string) string {
 		}
 	}
 	return buf.String()
+}
+
+// diagDump renders parser and semantic diagnostics for a source in a stable,
+// snapshot-friendly format: one diagnostic per line as
+// "<line>:<col>: <severity>: <message>", sorted by position then message.
+func diagDump(src string, mod *ast.Module, parser *parse.Parser) string {
+	type entry struct {
+		line, col int
+		sev, msg  string
+	}
+	var entries []entry
+
+	for _, err := range parser.Errors() {
+		if pe, ok := err.(*parse.ParseError); ok {
+			entries = append(entries, entry{pe.Span.Start.Line, pe.Span.Start.Col, "error", pe.Msg})
+		} else {
+			entries = append(entries, entry{0, 0, "error", err.Error()})
+		}
+	}
+
+	rep := &diagCollector{}
+	sem.CheckModule(mod, rep)
+	for _, d := range rep.diags {
+		entries = append(entries, entry{d.span.Start.Line, d.span.Start.Col, d.sev.String(), d.msg})
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		a, b := entries[i], entries[j]
+		if a.line != b.line {
+			return a.line < b.line
+		}
+		if a.col != b.col {
+			return a.col < b.col
+		}
+		return a.msg < b.msg
+	})
+
+	var sb strings.Builder
+	for _, e := range entries {
+		fmt.Fprintf(&sb, "%d:%d: %s: %s\n", e.line, e.col, e.sev, e.msg)
+	}
+	return sb.String()
+}
+
+// diagCollector captures semantic diagnostics with their severity.
+type diagCollector struct {
+	diags []struct {
+		span diag.Span
+		sev  diag.Severity
+		msg  string
+	}
+}
+
+func (c *diagCollector) Report(span diag.Span, msg string) {
+	c.ReportAt(span, diag.SeverityError, msg)
+}
+
+func (c *diagCollector) ReportAt(span diag.Span, sev diag.Severity, msg string) {
+	c.diags = append(c.diags, struct {
+		span diag.Span
+		sev  diag.Severity
+		msg  string
+	}{span, sev, msg})
 }
 
 func tokenDump(src string) string {
@@ -164,6 +231,25 @@ func Run(dir, caseFilter string) error {
 func runOne(dir string, c GoldenCase) error {
 	parser := parse.NewParser(c.Source)
 	mod := parser.ParseModule()
+
+	// Diagnostic-snapshot cases (bad programs). When a .diags sidecar exists we
+	// expect diagnostics rather than a clean compile, so tolerate parse errors
+	// and compare the collected diagnostics against the snapshot.
+	if want, ok := c.Expect["diags"]; ok {
+		got := diagDump(c.Source, mod, parser)
+		if d := Diff(strings.TrimRight(want, "\n"), strings.TrimRight(got, "\n")); d != "" {
+			return fmt.Errorf("diags mismatch:\n%s", d)
+		}
+		// Still allow other pure-syntax expectations (tokens/ast) below, but
+		// skip compile/run which are meaningless for a diagnostic case.
+		if _, hasTokens := c.Expect["tokens"]; hasTokens {
+			if d := Diff(c.Expect["tokens"], tokenDump(c.Source)); d != "" {
+				return fmt.Errorf("tokens mismatch:\n%s", d)
+			}
+		}
+		return nil
+	}
+
 	if len(parser.Errors()) > 0 {
 		return fmt.Errorf("parse: %v", parser.Errors())
 	}

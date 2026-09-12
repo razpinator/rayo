@@ -259,3 +259,45 @@ func NewName(ident string, span diag.Span) *Name {
 func NewLiteral(val any, span diag.Span) *Literal {
 	return &Literal{Value: val, span: span}
 }
+
+// SpanSetter is implemented by AST nodes that can have their source span
+// assigned after construction. The parser uses this to attach spans uniformly.
+type SpanSetter interface {
+	Node
+	SetSpan(diag.Span)
+}
+
+func (m *Module) SetSpan(s diag.Span)      { m.span = s }
+func (i *Import) SetSpan(s diag.Span)      { i.span = s }
+func (f *FuncDef) SetSpan(s diag.Span)     { f.span = s }
+func (p *Param) SetSpan(s diag.Span)       { p.span = s }
+func (s *VarStmt) SetSpan(sp diag.Span)    { s.span = sp }
+func (s *AssignStmt) SetSpan(sp diag.Span) { s.span = sp }
+func (s *IfStmt) SetSpan(sp diag.Span)     { s.span = sp }
+func (e *Elif) SetSpan(s diag.Span)        { e.span = s }
+func (s *WhileStmt) SetSpan(sp diag.Span)  { s.span = sp }
+func (s *ForStmt) SetSpan(sp diag.Span)    { s.span = sp }
+func (s *ReturnStmt) SetSpan(sp diag.Span) { s.span = sp }
+func (s *TryStmt) SetSpan(sp diag.Span)    { s.span = sp }
+func (e *Except) SetSpan(s diag.Span)      { e.span = s }
+func (s *ExprStmt) SetSpan(sp diag.Span)   { s.span = sp }
+func (e *Literal) SetSpan(s diag.Span)     { e.span = s }
+func (e *Name) SetSpan(s diag.Span)        { e.span = s }
+func (e *Call) SetSpan(s diag.Span)        { e.span = s }
+func (e *Index) SetSpan(s diag.Span)       { e.span = s }
+func (e *Attr) SetSpan(s diag.Span)        { e.span = s }
+func (e *UnaryOp) SetSpan(s diag.Span)     { e.span = s }
+func (e *BinaryOp) SetSpan(s diag.Span)    { e.span = s }
+func (e *DictLit) SetSpan(s diag.Span)     { e.span = s }
+func (e *ListLit) SetSpan(s diag.Span)     { e.span = s }
+func (e *Lambda) SetSpan(s diag.Span)      { e.span = s }
+
+// SetSpan assigns a span to n if n supports it, returning n unchanged. It is a
+// convenience for the parser so callers can write `ast.SetSpan(node, span)`
+// inline regardless of the concrete type.
+func SetSpan[T Node](n T, s diag.Span) T {
+	if ss, ok := any(n).(SpanSetter); ok {
+		ss.SetSpan(s)
+	}
+	return n
+}
