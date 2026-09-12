@@ -101,6 +101,42 @@ See `/examples/` for a cookbook of 10+ examples covering CLI tools, data process
 - [Data Structures](/docs/data.md)
 - [I/O Operations](/docs/io.md)
 
+## Semantic analysis
+
+The checker in `internal/sem` runs after parsing and before code generation. It
+performs:
+
+- **Type inference**: literals, dict/list literals, unary/binary results, and
+  name lookups resolve through the lexical symbol table. A bare `None` and a
+  `.get(key)` call infer as optional types.
+- **Null safety**: dereferencing (`x.attr`) or indexing (`x[i]`) a value whose
+  inferred type is optional is reported as `unsafe dereference of optional value`
+  / `unsafe index of optional value`.
+- **Definite assignment**: using a declared name before it is assigned reports
+  `use of unassigned variable: <name>`.
+- **Must-return analysis**: if any path in a function returns a value, every
+  path must terminate with a `return` or `raise`. Otherwise the checker reports
+  `missing return: not all paths in '<fn>' return a value`. `if/elif/else`,
+  `try/except/finally`, and `while true` are all accounted for.
+- **Unused variables**: emitted as warnings (severity `warning`), so they show
+  up in diagnostics without failing compilation.
+
+Diagnostics carry a severity (`error`/`warning`/`info`); only errors abort a
+build.
+
+## Code generation
+
+Generated Go is run through `go/format`, so the output is gofmt-clean and passes
+`go vet`. The generator lowers:
+
+- **Control flow**: `if/elif/else` → `if/else if/else`, `while` → `for`,
+  `for x in xs` → `for _, x := range xs`, and `try/except/finally` → a
+  `recover`-based closure with `defer`.
+- **Data literals**: dicts → `map[string]any{...}`, lists → `[]any{...}`.
+- **Operators**: `and`/`or`/`not` → `&&`/`||`/`!`.
+- **Functions**: parameters and a synthetic `return nil` guard so
+  expression-oriented bodies always type-check as `func(...) any`.
+
 ## Testing
 
 Run the full suite:

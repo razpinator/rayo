@@ -5,6 +5,11 @@
 - `WriteText(path, data)` — Write string to file
 - `ReadBytes(path)` — Read file as bytes
 - `WriteBytes(path, data)` — Write bytes to file
+- `ReadFile(path)` / `WriteFile(path, data)` — Aliases for `ReadText`/`WriteText`
+- `Exists(path) bool` — Report whether a path exists
+
+> These helpers use the `os` package (`os.ReadFile`/`os.WriteFile`); the
+> deprecated `io/ioutil` calls have been removed.
 
 ## JSON
 - `LoadJSON(path, v)` — Load JSON file into value

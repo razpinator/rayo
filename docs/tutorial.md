@@ -68,6 +68,21 @@ curl http://localhost:8080/users/1
 curl -X POST -H "Content-Type: application/json" -d '{"name":"Charlie","email":"charlie@example.com"}' http://localhost:8080/users
 ```
 
+### HTTP API reference (`rayo/stdlib/http`)
+
+The `http` stdlib package (`stdlib/http`) provides:
+
+- **App**: `NewApp()`, then `Get/Post/Put/Delete/Patch(path, handler)`.
+  Routing is method-aware; path parameters use brace syntax
+  (`/users/{id}`) and are read with `ctx.Param("id")`.
+- **Serving**: `app.Listen(addr)` starts the server with sensible read/write
+  timeouts; `app.Shutdown(ctx)` stops it gracefully.
+- **Context (request)**: `ctx.Query(key)`, `ctx.QueryDefault(key, def)`,
+  `ctx.Param(key)`, `ctx.Form(key)`, `ctx.Header(key)`, and `ctx.BindJSON(&v)`
+  (rejects unknown fields).
+- **Context (response)**: `ctx.JSON(status, v)` (returns an encoding error),
+  `ctx.Text(status, s)`, and `ctx.Status(status)`.
+
 ## Part 2: ETL Pipeline
 
 We'll build a simple ETL that processes CSV data.

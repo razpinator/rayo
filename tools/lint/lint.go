@@ -17,7 +17,7 @@ func LintModule(mod *ast.Module) []LintResult {
 	scope := sem.NewScope(nil)
 	for _, stmt := range mod.Body {
 		if v, ok := stmt.(*ast.VarStmt); ok {
-			scope.Symbols[v.Name] = ast.Any{}
+			scope.Symbols[v.Name] = &sem.AnyType{}
 			scope.Used[v.Name] = false
 		}
 		if a, ok := stmt.(*ast.AssignStmt); ok {

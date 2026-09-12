@@ -2,6 +2,7 @@ package compile
 
 import (
 	"fmt"
+	"go/format"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,12 +21,24 @@ type Options struct {
 	IncludePaths []string
 }
 
+// semReporter collects semantic diagnostics. It implements
+// diag.SeverityReporter so warnings (e.g. unused variables) and info hints do
+// not abort compilation; only errors are fatal.
 type semReporter struct {
-	msgs []string
+	errs  []string
+	warns []string
 }
 
-func (s *semReporter) Report(_ diag.Span, msg string) {
-	s.msgs = append(s.msgs, msg)
+func (s *semReporter) Report(span diag.Span, msg string) {
+	s.ReportAt(span, diag.SeverityError, msg)
+}
+
+func (s *semReporter) ReportAt(_ diag.Span, sev diag.Severity, msg string) {
+	if sev == diag.SeverityError {
+		s.errs = append(s.errs, msg)
+	} else {
+		s.warns = append(s.warns, msg)
+	}
 }
 
 func absKey(path string) (string, error) {
@@ -94,8 +107,8 @@ func collectModules(fromFile string, visit map[string]int, opts Options, stmts *
 
 	rep := &semReporter{}
 	sem.CheckModule(mod, rep)
-	if len(rep.msgs) > 0 {
-		return fmt.Errorf("semantic issues in %s:\n  %s", fromFile, strings.Join(rep.msgs, "\n  "))
+	if len(rep.errs) > 0 {
+		return fmt.Errorf("semantic errors in %s:\n  %s", fromFile, strings.Join(rep.errs, "\n  "))
 	}
 
 	for _, stmt := range mod.Body {
@@ -163,7 +176,20 @@ func buildGoSource(stmts []ast.Stmt, imports []string) string {
 		pkg.WriteString("}\n")
 	}
 
-	return pkg.String()
+	return formatGo(pkg.String())
+}
+
+// formatGo runs the generated source through go/format so the output is
+// gofmt-clean and go-vet friendly. If formatting fails (e.g. the generator
+// produced syntactically invalid Go), the unformatted source is returned so
+// the downstream `go run` surfaces a precise compiler error instead of an
+// opaque format error.
+func formatGo(src string) string {
+	formatted, err := format.Source([]byte(src))
+	if err != nil {
+		return src
+	}
+	return string(formatted)
 }
 
 // BuildProgram parses Rayo modules starting at mainPath (including .ryo imports),

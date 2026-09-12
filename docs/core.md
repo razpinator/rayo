@@ -27,6 +27,25 @@
 - `FormatTime(t, layout)` — Format time
 - `ParseTime(layout, value)` — Parse time
 
+## Errors
+- `Raise(msg string) error` — New error from literal text
+- `Raisef(format string, args...) error` — New error from a format string
+- `Wrap(err error, msg string) error` — Wrap while preserving the chain (`nil`-safe)
+- `Cause(err error) error` — Root cause after fully unwrapping
+- `Unwrap(err error) error` — One level of unwrapping
+- `Is(err, target error) bool` — Standard `errors.Is` chain matching
+- `As(err error, target any) bool` — Standard `errors.As` extraction
+- `WithStack(err error) error` — Attach a stack trace, keeping the chain intact
+
+> `Is`/`As` use standard-library semantics; matching is by value identity and
+> custom `Is`/`As` methods through the wrap chain, not by comparing type names.
+
+## Runtime comparison (`runtime/core`)
+- `Compare(a, b) int` — Order two values (`int`, `float`, `str`); mixed
+  int/float operands are compared numerically
+- `Equal(a, b) bool` — Value equality across numeric and string kinds
+- `Truthy(v) bool` — Rayo truthiness (nil/false/0/"" are falsy)
+
 ---
 
 See unit tests for usage examples.
