@@ -155,7 +155,62 @@ when an error-severity finding is present.
 
 ## Examples
 
-See `/examples/` for a cookbook of 10+ examples covering CLI tools, data processing, web APIs, error handling, and null safety.
+See `/examples/` for a cookbook of 10+ examples covering CLI tools, data processing, web APIs, error handling, null safety, and generics.
+
+## Language feature status
+
+Rayo's spec (`docs/spec.md`) is broader than the current compiler. This table
+tracks what actually transpiles today so expectations stay honest.
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Functions with typed params + return types | Implemented | `def f(a: int) -> int`; annotations map to Go types, unannotated stay `any` |
+| Generics | Implemented | `def id[T](x: T) -> T` → Go `func id[T any](x T) T` |
+| Control flow (`if/elif/else`, `while`, `for..in`, `try/except/finally`) | Implemented | plus `break`/`continue`/`pass`/`raise` |
+| Expressions (`and/or/not`, `+ - * / % //`, comparisons, calls, index, attr) | Implemented | list/dict literals, `lambda`/`func(){}`, `int/float/str/bool/None` |
+| Module system (imports) | Implemented | `.ryo` inlining with cycle detection; Go path passthrough; `import "p" as alias` |
+| Constant folding | Implemented | AST pass in `internal/opt`, runs before codegen |
+| Classes & properties (get/set) | Implemented | struct + `New` constructor + receiver methods + getter/setter; single base via embedding |
+| Pattern matching (`match`/`case`) | Implemented | lowers to an if/else-if chain; literal, capture, and `_` wildcard patterns |
+| Decorators (`@name`, `@factory(args)`) | Implemented | wraps the def nearest-first; factories supported; invoked via callable assertion |
+| Async/await | Planned | needs a concurrency lowering model |
+| Safe navigation (`?.`, `?[`) | Planned | specified, not yet lowered |
+| DCE / inlining / escape analysis | Planned | only constant folding exists today |
+
+A generics example lives at `examples/generics/identity.ryo`:
+
+```sh
+rayo run examples/generics/identity.ryo
+```
+
+which transpiles the generic `identity[T]` to Go generics, builds, and runs.
+
+A class example lives at `examples/class/point.ryo`:
+
+```sh
+rayo run examples/class/point.ryo
+```
+
+which lowers a `Point` class (constructor, method, and property) to a Go struct
+with a `NewPoint` constructor and receiver methods, then builds and runs.
+
+A pattern-matching example lives at `examples/match/classify.ryo`:
+
+```sh
+rayo run examples/match/classify.ryo
+```
+
+which lowers `match`/`case` (literal, capture, and `_` wildcard arms) to an
+if/else-if chain over the subject, then builds and runs.
+
+A decorator example lives at `examples/decorator/announce.ryo`:
+
+```sh
+rayo run examples/decorator/announce.ryo
+```
+
+which wraps a function with an `@announce` decorator and invokes the wrapped
+result through a callable assertion, then builds and runs.
 
 ## Documentation
 
@@ -198,8 +253,24 @@ Generated Go is run through `go/format`, so the output is gofmt-clean and passes
   `recover`-based closure with `defer`.
 - **Data literals**: dicts → `map[string]any{...}`, lists → `[]any{...}`.
 - **Operators**: `and`/`or`/`not` → `&&`/`||`/`!`.
-- **Functions**: parameters and a synthetic `return nil` guard so
-  expression-oriented bodies always type-check as `func(...) any`.
+- **Functions**: unannotated parameters and returns stay dynamic (`func(...) any`)
+  with a synthetic `return` guard for fall-through bodies. Type annotations lower
+  to Go types and generic type parameters (`def id[T](x: T) -> T`) become Go
+  generics (`func id[T any](x T) T`). A user-defined `def main()` maps to Go's
+  `func main()` entry point.
+- **Classes**: `class Name { ... }` lowers to a Go `type Name struct { ... }`, a
+  `NewName` constructor from `__init__`, receiver methods (the `self` parameter
+  becomes the receiver), and getter/setter methods for properties. Construction
+  by class name is rewritten to the generated constructor.
+- **Pattern matching**: `match subject { case ... }` lowers to a single subject
+  evaluation plus an `if`/`else if` chain — literal cases compare by equality, a
+  capture case binds the subject and always matches, and `_` is the default arm.
+- **Decorators**: `@decorator` lines above a `def` lower to a wrapper that
+  applies each decorator (nearest the `def` first) to a function literal of the
+  body and invokes the result. Factories like `@retry(3)` are supported.
+- **Constant folding**: an AST-to-AST pass (`internal/opt`) folds literal
+  arithmetic, string concatenation, comparisons, and boolean logic before
+  codegen, shrinking the generated Go without changing behavior.
 
 ## Testing
 

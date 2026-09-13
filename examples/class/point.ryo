@@ -1,0 +1,29 @@
+# Classes and properties
+# A class transpiles to a Go struct + constructor + methods, and a property
+# becomes getter/setter methods.
+
+class Point {
+    x: int
+    y: int
+
+    def __init__(self, x: int, y: int) {
+        self.x = x
+        self.y = y
+    }
+
+    def sum(self) -> int {
+        return self.x + self.y
+    }
+
+    property magnitude_hint {
+        get {
+            return self.x + self.y
+        }
+    }
+}
+
+def main() {
+    p = Point(3, 4)
+    print(p.sum())
+    print(p.magnitude_hint())
+}

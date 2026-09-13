@@ -1,0 +1,11 @@
+# Generics
+# A generic identity function and a typed helper, transpiled to Go generics.
+
+def identity[T](x: T) -> T {
+    return x
+}
+
+def main() {
+    print(identity(42))
+    print(identity("hello"))
+}

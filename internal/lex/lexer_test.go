@@ -17,7 +17,8 @@ func TestLexer_TableDriven(t *testing.T) {
 		{"string", "'abc' \"def\"", []TokenKind{TokenString, TokenWhitespace, TokenString, TokenEOF}},
 		{"comment", "# hello\nfoo", []TokenKind{TokenComment, TokenWhitespace, TokenIdent, TokenEOF}},
 		{"ops", "+ - == !=", []TokenKind{TokenOp, TokenWhitespace, TokenOp, TokenWhitespace, TokenOp, TokenWhitespace, TokenOp, TokenEOF}},
-		{"error", "@", []TokenKind{TokenError, TokenEOF}},
+		{"at", "@", []TokenKind{TokenAt, TokenEOF}},
+		{"error", "$", []TokenKind{TokenError, TokenEOF}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

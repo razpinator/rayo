@@ -11,6 +11,7 @@ import (
 	"rayo/internal/ast"
 	"rayo/internal/diag"
 	"rayo/internal/gen"
+	"rayo/internal/opt"
 	"rayo/internal/parse"
 	"rayo/internal/sem"
 )
@@ -80,7 +81,15 @@ const (
 	visitDone
 )
 
-func collectModules(fromFile string, visit map[string]int, opts Options, stmts *[]ast.Stmt, imports *[]string) error {
+// goImport is a collected Go import with an optional local alias (from
+// `import "path" as name`). Rayo-source (.ryo) imports are inlined and never
+// become Go imports, so they are filtered out before emission.
+type goImport struct {
+	Path  string
+	Alias string
+}
+
+func collectModules(fromFile string, visit map[string]int, opts Options, stmts *[]ast.Stmt, imports *[]goImport) error {
 	key, err := absKey(fromFile)
 	if err != nil {
 		return fmt.Errorf("%s: %w", fromFile, err)
@@ -111,15 +120,18 @@ func collectModules(fromFile string, visit map[string]int, opts Options, stmts *
 		return fmt.Errorf("semantic errors in %s:\n  %s", fromFile, strings.Join(rep.errs, "\n  "))
 	}
 
+	// Optimize: constant-fold literal expressions before code generation.
+	opt.FoldModule(mod)
+
 	for _, stmt := range mod.Body {
 		if gen.ContainsPrint(stmt) {
-			*imports = append(*imports, "fmt")
+			*imports = append(*imports, goImport{Path: "fmt"})
 			break
 		}
 	}
 
 	for _, imp := range mod.Imports {
-		*imports = append(*imports, imp.Path)
+		*imports = append(*imports, goImport{Path: imp.Path, Alias: imp.Alias})
 		if strings.HasSuffix(imp.Path, ".ryo") {
 			resolved, err := resolveRyoImport(fromFile, imp.Path, opts.IncludePaths)
 			if err != nil {
@@ -135,32 +147,43 @@ func collectModules(fromFile string, visit map[string]int, opts Options, stmts *
 	return nil
 }
 
-func buildGoSource(stmts []ast.Stmt, imports []string) string {
-	importSet := map[string]bool{}
+func buildGoSource(stmts []ast.Stmt, imports []goImport) string {
+	// Deduplicate Go imports by path, preserving the first alias seen. A .ryo
+	// import is inlined elsewhere and never emitted as a Go import.
+	aliasByPath := map[string]string{}
+	var paths []string
 	for _, imp := range imports {
-		if imp == "" || strings.HasSuffix(imp, ".ryo") {
+		if imp.Path == "" || strings.HasSuffix(imp.Path, ".ryo") {
 			continue
 		}
-		importSet[imp] = true
+		if _, seen := aliasByPath[imp.Path]; !seen {
+			paths = append(paths, imp.Path)
+		}
+		if imp.Alias != "" {
+			aliasByPath[imp.Path] = imp.Alias
+		} else if _, seen := aliasByPath[imp.Path]; !seen {
+			aliasByPath[imp.Path] = ""
+		}
 	}
 
 	var pkg strings.Builder
 	pkg.WriteString("package main\n\n")
-	impKeys := make([]string, 0, len(importSet))
-	for imp := range importSet {
-		impKeys = append(impKeys, imp)
-	}
-	sort.Strings(impKeys)
-	for _, imp := range impKeys {
-		pkg.WriteString(fmt.Sprintf("import %q\n", imp))
+	sort.Strings(paths)
+	for _, path := range paths {
+		if alias := aliasByPath[path]; alias != "" {
+			pkg.WriteString(fmt.Sprintf("import %s %q\n", alias, path))
+		} else {
+			pkg.WriteString(fmt.Sprintf("import %q\n", path))
+		}
 	}
 
 	var topFuncs strings.Builder
 	var mainBody strings.Builder
 	ctx := gen.NewGenContext("main")
+	gen.RegisterClasses(stmts, ctx)
 
 	for _, stmt := range stmts {
-		if _, ok := stmt.(*ast.FuncDef); ok {
+		if gen.IsTopLevelDecl(stmt) {
 			ctx.Code = &topFuncs
 			gen.EmitStmt(stmt, ctx)
 		} else {
@@ -201,7 +224,7 @@ func BuildProgram(mainPath string, opts Options) (string, error) {
 	}
 	visit := map[string]int{}
 	var stmts []ast.Stmt
-	var imports []string
+	var imports []goImport
 	if err := collectModules(mainPath, visit, opts, &stmts, &imports); err != nil {
 		return "", err
 	}

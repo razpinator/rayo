@@ -15,10 +15,44 @@ type GenContext struct {
 	// emission unit so the first assignment declares (`:=`) and later ones
 	// reassign (`=`), avoiding Go's "no new variables on left side" error.
 	declared map[string]bool
+	// classes records declared class names so a call whose callee is a class
+	// name is rewritten to the generated `New<Class>` constructor.
+	classes map[string]bool
+	// funcs records top-level function names emitted as real Go funcs. A call
+	// whose callee is NOT one of these (and not a class or builtin) targets a
+	// dynamic `any` value (e.g. a function passed as a parameter), so it is
+	// invoked via a `func(...any) any` type assertion.
+	funcs map[string]bool
 }
 
 func NewGenContext(pkg string) *GenContext {
-	return &GenContext{PackageName: pkg, Code: &strings.Builder{}, declared: map[string]bool{}}
+	return &GenContext{PackageName: pkg, Code: &strings.Builder{}, declared: map[string]bool{}, classes: map[string]bool{}, funcs: map[string]bool{}}
+}
+
+// registerFunc records name as a top-level function.
+func (ctx *GenContext) registerFunc(name string) {
+	if ctx.funcs == nil {
+		ctx.funcs = map[string]bool{}
+	}
+	ctx.funcs[name] = true
+}
+
+// isFunc reports whether name is a known top-level function.
+func (ctx *GenContext) isFunc(name string) bool {
+	return ctx.funcs != nil && ctx.funcs[name]
+}
+
+// registerClass records a class name so constructor calls can be rewritten.
+func (ctx *GenContext) registerClass(name string) {
+	if ctx.classes == nil {
+		ctx.classes = map[string]bool{}
+	}
+	ctx.classes[name] = true
+}
+
+// isClass reports whether name is a declared class in this emission unit.
+func (ctx *GenContext) isClass(name string) bool {
+	return ctx.classes != nil && ctx.classes[name]
 }
 
 // markDeclared records name as declared and reports whether this is the first

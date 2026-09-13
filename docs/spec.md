@@ -170,16 +170,16 @@ assignment_statement = target assignment_operator expression
 assignment_operator = "=" | "+=" | "-=" | "*=" | "/=" | "%="
 target = IDENTIFIER | attribute_access | subscript_access
 
-if_statement = "if" expression block_statement 
-               {"elif" expression block_statement} 
+if_statement = "if" expression block_statement
+               {"elif" expression block_statement}
                ["else" block_statement]
 
 while_statement = "while" expression block_statement
 
 for_statement = "for" IDENTIFIER "in" expression block_statement
 
-try_statement = "try" block_statement 
-                {except_clause} 
+try_statement = "try" block_statement
+                {except_clause}
                 ["finally" block_statement]
 
 except_clause = "except" [IDENTIFIER ["as" IDENTIFIER]] block_statement
@@ -348,7 +348,7 @@ All other values evaluate to `True`.
 ```rayo
 // Basic types
 int: 64-bit signed integer
-float: 64-bit floating point  
+float: 64-bit floating point
 str: UTF-8 string
 bool: True or False
 
@@ -378,7 +378,7 @@ def identity[T](x: T) -> T {
 
 class Container[T] {
     value: T
-    
+
     def __init__(self, value: T) {
         self.value = value
     }
@@ -478,12 +478,12 @@ if err := risky(); err != nil {
 class Point {
     x: int
     y: int
-    
+
     def __init__(self, x: int, y: int) {
         self.x = x
         self.y = y
     }
-    
+
     def distance(self) -> float {
         return (self.x * self.x + self.y * self.y) ** 0.5
     }
@@ -545,14 +545,14 @@ if result != None {
 ```rayo
 class BankAccount {
     balance: float
-    
+
     def __init__(self, initial_balance: float) {
         if initial_balance < 0 {
             raise ValueError("Initial balance cannot be negative")
         }
         self.balance = initial_balance
     }
-    
+
     def withdraw(self, amount: float) -> bool {
         if amount > self.balance {
             return False
@@ -560,7 +560,7 @@ class BankAccount {
         self.balance -= amount
         return True
     }
-    
+
     def deposit(self, amount: float) {
         if amount <= 0 {
             raise ValueError("Deposit amount must be positive")
@@ -573,13 +573,13 @@ def main() {
     try {
         account: BankAccount = BankAccount(100.0)
         account.deposit(50.0)
-        
+
         if account.withdraw(30.0) {
             print("Withdrawal successful")
         } else {
             print("Insufficient funds")
         }
-        
+
     } except ValueError as e {
         print("Error:", e)
     }
@@ -596,21 +596,21 @@ def process_data() {
         "Bob": 87,
         "Charlie": 92
     }
-    
+
     // Safe access
     alice_score: int? = scores.get("Alice")  // Optional method
     dave_score: int = scores.get("Dave", 0)  // With default
-    
+
     // List operations
     students: list[str] = ["Alice", "Bob", "Charlie"]
-    
+
     for student in students {
         score: int? = scores.get(student)
         if score != None {
             print(f"{student}: {score}")
         }
     }
-    
+
     // List comprehension equivalent
     high_scorers: list[str] = []
     for name, score in scores.items() {
@@ -628,7 +628,7 @@ def find_max[T](items: list[T], compare: def(T, T) -> bool) -> T? {
     if len(items) == 0 {
         return None
     }
-    
+
     max_item: T = items[0]
     for item in items[1:] {
         if compare(item, max_item) {
@@ -661,20 +661,37 @@ max_num: int? = find_max(numbers, compare_ints)
 2. **Statement vs Expression**: Context determines interpretation
 3. **Generic Brackets**: `func[T]` vs `func[0]` resolved by type context
 
-## Future Considerations
+## Implementation Status
 
-### Planned Features
-- Pattern matching
-- Async/await syntax
-- Module system
-- Decorators
-- Property getters/setters
+This section tracks how much of the spec is realized in the transpiler today, so
+the grammar above can be read alongside what actually compiles.
+
+### Implemented end-to-end
+
+- **Functions with parameters, type annotations, and return types**: `def f(a: int, b: int) -> int { ... }` parses parameters and annotations and lowers to typed Go signatures (`int -> int64`, `float -> float64`, `str -> string`, `bool -> bool`, `list[T] -> []T`, `dict[K,V] -> map[K]V`, `T? -> *T`). Unannotated parameters stay dynamic (`any`).
+- **Generics**: `def name[T](x: T) -> T { ... }` transpiles to Go generics `func name[T any](x T) T`. Type parameters are in scope for parameter and return annotations.
+- **Control flow**: `if/elif/else`, `while`, `for x in xs`, and `try/except [Type] [as name]/finally`, plus `break`/`continue`/`pass`/`raise`.
+- **Expressions**: logical `and`/`or`/`not`, comparisons (`== != < <= > >=`), arithmetic (`+ - * / % //`), unary `-`/`+`/`not`, calls, indexing, attribute access, list/dict literals, `lambda`/`func(){}` closures, and `int`/`float`/`str`/`bool`/`None` literals.
+- **Module system (imports)**: `.ryo` imports are resolved (relative and via include paths) with cycle detection and inlined; Go import paths pass through; `import "path" as alias` emits an aliased Go import.
+- **Classes and properties (get/set)**: `class Name [(Base)] { fields; methods; property blocks }` transpiles to a Go struct, a `NewName` constructor synthesized from `__init__`, receiver methods (the leading `self` parameter becomes the receiver), and getter/setter methods for each property (`property p { get {..} set(v) {..} }` → `p()` and `SetP(v)`). Construction by class name (`Point(1, 2)`) is rewritten to the generated constructor (`NewPoint(1, 2)`). A single base class is supported via struct embedding.
+- **Constant folding** (see Transpilation Optimizations below).
+
+- **Pattern matching** (`match`/`case`): `match subject { case pattern { ... } }` lowers to a single evaluation of the subject followed by an `if`/`else if` chain. Cases may be literal/expression patterns (matched by equality), a capture binding (`case name { ... }`, binds the subject and always matches), or the `_` wildcard (the default arm). Must-return analysis understands that a `match` with a default arm whose every arm returns is exhaustive.
+- **Decorators** (`@name` / `@factory(args)`): one or more `@decorator` lines above a `def` wrap the function. The function is lowered to a wrapper that applies each decorator (nearest the `def` first, matching Python) to a function literal of the body and invokes the result. Decorator factories (`@retry(3)`) are supported: the factory call produces the actual decorator, which is applied via a callable assertion. Note: because Rayo values are dynamically typed (`any`) at runtime, a wrapped function is invoked through a `func(...any) any` type assertion in the generated Go.
+
+### Planned Features (not yet implemented)
+
+These are specified above but not yet wired through parser → sem → gen. Each
+needs an AST node, parser production, semantic handling, and a transpilation
+strategy:
+
+- **Async/await**: needs new keywords, AST, and a goroutine/channel-based lowering model.
+- **Safe navigation** (`?.`, `?[`): specified in the lexical grammar; not yet tokenized or lowered.
 
 ### Transpilation Optimizations
-- Dead code elimination
-- Constant folding
-- Inline small functions
-- Escape analysis for pointer optimization
+
+- **Constant folding**: IMPLEMENTED as an AST-to-AST pass (`internal/opt`) that runs after semantic analysis. It evaluates operations whose operands are all literals — integer/float arithmetic, string concatenation, comparisons, and boolean logic — replacing them with a single literal. It deliberately leaves division/modulo by zero and any non-constant subexpression untouched so observable behavior is unchanged.
+- **Dead code elimination**, **small-function inlining**, and **escape/pointer analysis**: planned; not yet implemented.
 
 ---
 

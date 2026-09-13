@@ -12,7 +12,8 @@ graph TD
     B --> C[Parser<br/>internal/parse]
     C --> D[AST<br/>internal/ast]
     D --> E[Semantic Analysis<br/>internal/sem]
-    E --> F[Code Generation<br/>internal/gen]
+    E --> P[Optimization<br/>internal/opt]
+    P --> F[Code Generation<br/>internal/gen]
     F --> G[Go Code<br/>.go files]
 
     G --> H[Go Compiler]
@@ -55,7 +56,11 @@ graph TD
    - Detects semantic errors
    - Enables optimizations
 
-5. **Code Generation (internal/gen)**
+5. **Optimization (internal/opt)**
+   - AST-to-AST passes between semantics and codegen
+   - Constant folding of literal expressions (behavior-preserving)
+
+6. **Code Generation (internal/gen)**
    - Translates AST to Go source code
    - Handles control flow lowering
    - Manages variable scoping
@@ -63,13 +68,13 @@ graph TD
 
 ### Runtime System
 
-6. **Runtime Libraries (runtime/)**
+7. **Runtime Libraries (runtime/)**
    - **core**: Core runtime functionality
    - **dict**: Dictionary/map implementation
    - **err**: Error handling system
    - **obj**: Object system and reflection
 
-7. **Standard Library (stdlib/)**
+8. **Standard Library (stdlib/)**
    - **core**: Basic functions (math, strings, time, etc.)
    - **data**: Data processing utilities
    - **http**: HTTP server framework
@@ -77,16 +82,16 @@ graph TD
 
 ### Development Tools
 
-8. **Formatter (tools/fmt)**
+9. **Formatter (tools/fmt)**
    - Formats source code according to style guidelines
    - Ensures consistent code formatting
 
-9. **Linter (tools/lint)**
+10. **Linter (tools/lint)**
    - Performs static analysis
    - Detects potential bugs and style issues
    - Provides suggestions for improvement
 
-10. **LSP Server (tools/lsp)**
+11. **LSP Server (tools/lsp)**
     - Implements the Language Server Protocol over both TCP and stdio transports (`serve()` drives one shared read/dispatch loop for both)
     - Lifecycle: `initialize` (with client capability negotiation) → `initialized` → requests → `shutdown` → `exit`, guarded so requests before `initialize` return a structured "server not initialized" error
     - Diagnostics, hover, and go-to-definition
@@ -104,6 +109,8 @@ Lexer → Tokens
 Parser → AST
     ↓
 Semantic Analysis → Annotated AST
+    ↓
+Optimization (constant folding) → Optimized AST
     ↓
 Code Generation → Go Code
     ↓
@@ -183,6 +190,7 @@ rayo/
 │   ├── diag/          # Diagnostics
 │   ├── gen/           # Code generation
 │   ├── lex/           # Lexer
+│   ├── opt/           # Optimization passes (constant folding)
 │   ├── parse/         # Parser
 │   ├── sem/           # Semantic analysis
 │   └── compile/       # Multi-file compile, import graph, main() lowering

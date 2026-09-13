@@ -1,0 +1,36 @@
+# Pattern matching
+# `match`/`case` lowers to an if/else-if chain over the subject.
+# Cases can be literals, a capture binding, or the `_` wildcard.
+
+def classify(n) {
+    match n {
+        case 0 {
+            return "zero"
+        }
+        case 1 {
+            return "one"
+        }
+        case other {
+            return "many"
+        }
+    }
+}
+
+def describe(s) {
+    match s {
+        case "hi" {
+            return "greeting"
+        }
+        case _ {
+            return "other"
+        }
+    }
+}
+
+def main() {
+    print(classify(0))
+    print(classify(1))
+    print(classify(7))
+    print(describe("hi"))
+    print(describe("bye"))
+}

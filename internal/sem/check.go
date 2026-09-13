@@ -99,6 +99,9 @@ func (c *checker) checkStmt(stmt ast.Stmt, scope *Scope) {
 	case *ast.FuncDef:
 		c.checkFuncDef(s, scope)
 
+	case *ast.ClassDef:
+		c.checkClassDef(s, scope)
+
 	case *ast.VarStmt:
 		var typ Type = &AnyType{}
 		if s.Value != nil {
@@ -164,6 +167,22 @@ func (c *checker) checkStmt(stmt ast.Stmt, scope *Scope) {
 		}
 		c.checkBlock(s.Finally, scope)
 
+	case *ast.MatchStmt:
+		c.checkExpr(s.Subject, scope)
+		for _, cs := range s.Cases {
+			child := NewScope(scope)
+			if cs.Pattern != nil {
+				c.checkExpr(cs.Pattern, scope)
+			}
+			if cs.Binding != "" {
+				// A capture binds the subject to a name inside the arm.
+				child.define(cs.Binding, &AnyType{}, true, cs.Span())
+				child.Used[cs.Binding] = true
+			}
+			c.checkStmts(cs.Body, child)
+			c.reportUnused(child)
+		}
+
 	case *ast.ExprStmt:
 		c.checkExpr(s.Expr, scope)
 	}
@@ -172,6 +191,10 @@ func (c *checker) checkStmt(stmt ast.Stmt, scope *Scope) {
 // checkFuncDef checks a function body in a fresh child scope and enforces
 // must-return when the body produces values on some path.
 func (c *checker) checkFuncDef(fn *ast.FuncDef, parent *Scope) {
+	// Decorator expressions are evaluated in the enclosing scope.
+	for _, d := range fn.Decorators {
+		c.checkExpr(d, parent)
+	}
 	scope := NewScope(parent)
 	for _, p := range fn.Params {
 		scope.define(p.Name, &AnyType{}, true, p.Span())
@@ -184,6 +207,41 @@ func (c *checker) checkFuncDef(fn *ast.FuncDef, parent *Scope) {
 	if returnsValue(fn.Body) && !MustReturn(fn.Body) {
 		diag.ReportAt(c.rep, fn.Span(), diag.SeverityError,
 			"missing return: not all paths in '"+fn.Name+"' return a value")
+	}
+}
+
+// checkClassDef registers the class name as a known symbol and checks each
+// method and property body. Methods are checked like functions; the class's
+// fields are made visible via `self`, so member access inside methods is not
+// flagged. Must-return is intentionally not enforced for property getters
+// (they are lowered with a synthetic zero-value return).
+func (c *checker) checkClassDef(cls *ast.ClassDef, parent *Scope) {
+	// The class name becomes a value in scope (constructor calls reference it).
+	parent.define(cls.Name, &AnyType{}, true, cls.Span())
+	parent.Used[cls.Name] = true
+
+	for _, m := range cls.Methods {
+		c.checkFuncDef(m, parent)
+	}
+	for _, prop := range cls.Properties {
+		getScope := NewScope(parent)
+		getScope.define("self", &AnyType{}, true, prop.Span())
+		getScope.Used["self"] = true
+		c.checkStmts(prop.Get, getScope)
+		c.reportUnused(getScope)
+		if len(prop.Set) > 0 {
+			setScope := NewScope(parent)
+			setScope.define("self", &AnyType{}, true, prop.Span())
+			setScope.Used["self"] = true
+			setParam := prop.SetParam
+			if setParam == "" {
+				setParam = "value"
+			}
+			setScope.define(setParam, &AnyType{}, true, prop.Span())
+			setScope.Used[setParam] = true
+			c.checkStmts(prop.Set, setScope)
+			c.reportUnused(setScope)
+		}
 	}
 }
 

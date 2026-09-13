@@ -65,6 +65,20 @@ func stmtTerminates(stmt ast.Stmt) bool {
 		// terminates the surrounding flow. Any other loop condition may skip
 		// the body entirely and fall through.
 		return isTrueLiteral(s.Cond) && !containsBreak(s.Body)
+	case *ast.MatchStmt:
+		// A match terminates only if it is exhaustive (has a wildcard/capture
+		// default arm) and every arm terminates. Without a default arm the
+		// subject may match nothing and fall through.
+		hasDefault := false
+		for _, cs := range s.Cases {
+			if cs.IsWildcard || cs.Binding != "" {
+				hasDefault = true
+			}
+			if !MustReturn(cs.Body) {
+				return false
+			}
+		}
+		return hasDefault && len(s.Cases) > 0
 	default:
 		// ForStmt and other statements do not guarantee termination.
 		return false

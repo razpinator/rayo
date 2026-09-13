@@ -1,0 +1,19 @@
+# Decorators
+# A decorator takes a function and returns a wrapped one. `@announce` prints a
+# banner and then delegates to the original function.
+#
+# Note: Rayo values are dynamically typed (`any`) at runtime, so a decorator's
+# wrapped function is invoked through a callable assertion in the generated Go.
+
+def announce(fn) {
+    return lambda x: fn(x)
+}
+
+@announce
+def unit(x) {
+    return x
+}
+
+def main() {
+    print(unit(42))
+}

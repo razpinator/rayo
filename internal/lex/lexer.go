@@ -6,9 +6,20 @@ import (
 	"unicode"
 )
 
-// Python keywords (subset for demo; use full list in production)
+// Rayo reserved words. This tracks the Python-derived keyword set used across
+// the language (control flow, declarations, operators-as-words, and literals).
+// The parser also matches some of these by value, but lexing them as keywords
+// keeps tooling (LSP completion, formatter spacing) in sync.
 var pythonKeywords = map[string]struct{}{
-	"if": {}, "elif": {}, "else": {}, "while": {}, "for": {}, "def": {}, "return": {}, "try": {}, "except": {}, "finally": {}, "None": {}, "import": {}, "var": {},
+	// Control flow and declarations.
+	"if": {}, "elif": {}, "else": {}, "while": {}, "for": {}, "def": {},
+	"return": {}, "try": {}, "except": {}, "finally": {}, "import": {}, "var": {},
+	"class": {}, "break": {}, "continue": {}, "pass": {}, "lambda": {}, "raise": {},
+	"match": {}, "case": {},
+	// Word operators and membership.
+	"and": {}, "or": {}, "not": {}, "in": {}, "is": {}, "as": {}, "from": {},
+	// Literals.
+	"None": {}, "True": {}, "False": {},
 }
 
 // Keywords returns the sorted list of reserved keywords recognized by the
@@ -33,6 +44,14 @@ type Lexer struct {
 
 func NewLexer(src string) *Lexer {
 	return &Lexer{src: src, line: 1, col: 1}
+}
+
+// Clone returns a copy of the lexer at its current position. Callers can drive
+// the copy forward (e.g. for one-token lookahead) without disturbing the
+// original lexer's state.
+func (lx *Lexer) Clone() *Lexer {
+	cp := *lx
+	return &cp
 }
 
 // Next returns the next token.
@@ -97,6 +116,10 @@ func (lx *Lexer) Next() Token {
 			lx.offset++
 			lx.col++
 			return Token{Kind: TokenDot, Value: ".", Offset: lx.offset - 1, Line: lx.line, Col: lx.col - 1}
+		case '@':
+			lx.offset++
+			lx.col++
+			return Token{Kind: TokenAt, Value: "@", Offset: lx.offset - 1, Line: lx.line, Col: lx.col - 1}
 		case '"', '\'':
 			quote := ch
 			start := lx.offset
@@ -125,6 +148,17 @@ func (lx *Lexer) Next() Token {
 				for lx.offset < len(lx.src) && unicode.IsDigit(rune(lx.src[lx.offset])) {
 					lx.offset++
 					lx.col++
+				}
+				// Fractional part: a '.' immediately followed by a digit makes
+				// this a float. A trailing '.' with no digit (e.g. "1.method")
+				// is left for the dot/attribute lexer.
+				if lx.offset+1 < len(lx.src) && lx.src[lx.offset] == '.' && unicode.IsDigit(rune(lx.src[lx.offset+1])) {
+					lx.offset++ // consume '.'
+					lx.col++
+					for lx.offset < len(lx.src) && unicode.IsDigit(rune(lx.src[lx.offset])) {
+						lx.offset++
+						lx.col++
+					}
 				}
 				return Token{Kind: TokenNumber, Value: lx.src[start:lx.offset], Offset: start, Line: lx.line, Col: startCol}
 			}
