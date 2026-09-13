@@ -96,8 +96,8 @@ import "rayo/stdlib/io"
 import "rayo/stdlib/data"
 
 def main() {
-    # Extract: Read CSV
-    csv_data = io.ReadCSV("data/input.csv")
+    # Extract: Read CSV (returns a list of dict rows)
+    csv_data = io.LoadCSV("data/input.csv")
 
     # Transform: Filter and map
     processed = data.Filter(csv_data, func(row) {
@@ -112,7 +112,7 @@ def main() {
     })
 
     # Load: Write JSON
-    io.WriteJSON("data/output.json", processed)
+    io.DumpJSON("data/output.json", processed)
     print("ETL completed")
 }
 ```

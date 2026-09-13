@@ -120,8 +120,9 @@ func collectModules(fromFile string, visit map[string]int, opts Options, stmts *
 		return fmt.Errorf("semantic errors in %s:\n  %s", fromFile, strings.Join(rep.errs, "\n  "))
 	}
 
-	// Optimize: constant-fold literal expressions before code generation.
-	opt.FoldModule(mod)
+	// Optimize: constant folding, small-function inlining, and dead-code
+	// elimination (behavior-preserving) before code generation.
+	opt.Optimize(mod)
 
 	for _, stmt := range mod.Body {
 		if gen.ContainsPrint(stmt) {

@@ -203,3 +203,46 @@ def main() {
 		t.Errorf("expected callable assertion on decorated result, got:\n%s", out)
 	}
 }
+
+// TestOptimizeInliningInPipeline verifies inlining + folding run during
+// compilation: a call to a tiny function with a literal argument is inlined and
+// folded to a constant.
+func TestOptimizeInliningInPipeline(t *testing.T) {
+	dir := t.TempDir()
+	src := `def add1(x) {
+    return x + 1
+}
+def compute() {
+    return add1(41)
+}
+print(compute())
+`
+	writeFile(t, filepath.Join(dir, "main.ryo"), src)
+	out, err := BuildProgram(filepath.Join(dir, "main.ryo"), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(out, "return 42") {
+		t.Errorf("expected add1(41) inlined and folded to `return 42`, got:\n%s", out)
+	}
+}
+
+// TestOptimizeDCEInPipeline verifies unreachable code after a return is dropped
+// during compilation.
+func TestOptimizeDCEInPipeline(t *testing.T) {
+	dir := t.TempDir()
+	src := `def f() {
+    return 1
+    print("unreachable")
+}
+print(f())
+`
+	writeFile(t, filepath.Join(dir, "main.ryo"), src)
+	out, err := BuildProgram(filepath.Join(dir, "main.ryo"), Options{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(out, "unreachable") {
+		t.Errorf("expected unreachable statement removed by DCE, got:\n%s", out)
+	}
+}

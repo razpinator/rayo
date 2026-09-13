@@ -76,11 +76,9 @@ If you prefer to build manually:
 rayo [command]
 
 Available Commands:
-  lex         Lex source file
-  parse       Parse source file
-  check       Check semantics
   run         Transpile and run
   transpile   Transpile to Go
+  test        Run golden tests
   fmt         Format .ryo source files
   lint        Lint .ryo source files
   repl        Start the interactive Rayo REPL
@@ -88,11 +86,14 @@ Available Commands:
   version     Print version information
 
 Flags:
-  -I, --include stringSlice   Include paths
-  -o, --output string         Output directory
+  -I, --include stringSlice   Include paths for resolving .ryo imports
+  -o, --output string         Output directory or file for transpile
   -v, --verbose               Verbose output
       --emit-go               Emit Go code
 ```
+
+A second binary, `rayoc`, is shipped alongside `rayo` and exposes the identical
+command set (it is an alias entry point).
 
 ## Editor support (LSP)
 
@@ -109,6 +110,33 @@ names in scope, and `def`/`if`/`try` snippets), find references, document
 symbols, and workspace symbols. The server negotiates client capabilities on
 `initialize` (for example, emitting snippet syntax only when the client
 advertises snippet support) and reports errors with structured JSON-RPC codes.
+
+### Editor setup
+
+**Neovim** (built-in LSP, stdio transport):
+
+```lua
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rayo",
+  callback = function(args)
+    vim.lsp.start({
+      name = "rayo",
+      cmd = { "rayo", "lsp", "--stdio" },
+      root_dir = vim.fs.dirname(vim.fs.find({ ".git", "go.mod" }, { upward = true })[1]),
+    })
+  end,
+})
+-- Associate the .ryo extension with the `rayo` filetype:
+vim.filetype.add({ extension = { ryo = "rayo" } })
+```
+
+**VS Code**: the repo ships a client config at `tools/lsp/vscode-client.json`.
+Point your extension host at it, or connect a generic LSP client to the TCP
+server started by `rayo lsp` (default `:2087`).
+
+**Emacs / Helix / other editors** that spawn the server as a child process:
+configure the command `rayo lsp --stdio`. Editors that connect over a socket can
+use `rayo lsp [address]` instead.
 
 ## Formatter
 
@@ -169,7 +197,7 @@ tracks what actually transpiles today so expectations stay honest.
 | Control flow (`if/elif/else`, `while`, `for..in`, `try/except/finally`) | Implemented | plus `break`/`continue`/`pass`/`raise` |
 | Expressions (`and/or/not`, `+ - * / % //`, comparisons, calls, index, attr) | Implemented | list/dict literals, `lambda`/`func(){}`, `int/float/str/bool/None` |
 | Module system (imports) | Implemented | `.ryo` inlining with cycle detection; Go path passthrough; `import "p" as alias` |
-| Constant folding | Implemented | AST pass in `internal/opt`, runs before codegen |
+| Optimizer (folding, inlining, DCE) | Implemented | `internal/opt` pipeline runs before codegen; escape analysis delegated to Go |
 | Classes & properties (get/set) | Implemented | struct + `New` constructor + receiver methods + getter/setter; single base via embedding |
 | Pattern matching (`match`/`case`) | Implemented | lowers to an if/else-if chain; literal, capture, and `_` wildcard patterns |
 | Decorators (`@name`, `@factory(args)`) | Implemented | wraps the def nearest-first; factories supported; invoked via callable assertion |
@@ -268,9 +296,11 @@ Generated Go is run through `go/format`, so the output is gofmt-clean and passes
 - **Decorators**: `@decorator` lines above a `def` lower to a wrapper that
   applies each decorator (nearest the `def` first) to a function literal of the
   body and invokes the result. Factories like `@retry(3)` are supported.
-- **Constant folding**: an AST-to-AST pass (`internal/opt`) folds literal
-  arithmetic, string concatenation, comparisons, and boolean logic before
-  codegen, shrinking the generated Go without changing behavior.
+- **Optimizer**: a behavior-preserving AST pipeline (`internal/opt`) runs before
+  codegen — constant folding, conservative small-function inlining, and
+  dead-code elimination (unreachable statements + constant-branch pruning).
+  Escape/pointer analysis is left to the Go compiler, which performs it on the
+  generated code.
 
 ## Testing
 

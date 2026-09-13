@@ -59,6 +59,22 @@ func foldStmt(stmt ast.Stmt) ast.Stmt {
 			exc.Body = foldStmts(exc.Body)
 		}
 		s.Finally = foldStmts(s.Finally)
+	case *ast.ClassDef:
+		for _, m := range s.Methods {
+			m.Body = foldStmts(m.Body)
+		}
+		for _, p := range s.Properties {
+			p.Get = foldStmts(p.Get)
+			p.Set = foldStmts(p.Set)
+		}
+	case *ast.MatchStmt:
+		s.Subject = foldExpr(s.Subject)
+		for _, cs := range s.Cases {
+			if cs.Pattern != nil {
+				cs.Pattern = foldExpr(cs.Pattern)
+			}
+			cs.Body = foldStmts(cs.Body)
+		}
 	case *ast.ExprStmt:
 		s.Expr = foldExpr(s.Expr)
 	}

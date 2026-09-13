@@ -690,8 +690,14 @@ strategy:
 
 ### Transpilation Optimizations
 
-- **Constant folding**: IMPLEMENTED as an AST-to-AST pass (`internal/opt`) that runs after semantic analysis. It evaluates operations whose operands are all literals — integer/float arithmetic, string concatenation, comparisons, and boolean logic — replacing them with a single literal. It deliberately leaves division/modulo by zero and any non-constant subexpression untouched so observable behavior is unchanged.
-- **Dead code elimination**, **small-function inlining**, and **escape/pointer analysis**: planned; not yet implemented.
+The optimizer (`internal/opt`) runs a behavior-preserving pipeline after
+semantic analysis and before code generation: constant folding → small-function
+inlining → constant folding → dead-code elimination.
+
+- **Constant folding**: IMPLEMENTED. Evaluates operations whose operands are all literals — integer/float arithmetic, string concatenation, comparisons, and boolean logic — replacing them with a single literal. It deliberately leaves division/modulo by zero and any non-constant subexpression untouched so observable behavior is unchanged.
+- **Small-function inlining**: IMPLEMENTED (conservative). Inlines calls to top-level functions whose body is a single `return <expr>`, substituting arguments for parameters. It skips recursive functions, arity mismatches, decorated/generic functions, and any case that would duplicate a side-effecting argument (an argument is only duplicated when it is a literal/name or its parameter is used at most once). Inlined literal expressions are folded by the following fold pass.
+- **Dead-code elimination**: IMPLEMENTED. Drops statements after a terminator (`return`/`raise`/`break`/`continue`) and prunes `if`/`elif` branches whose condition folds to a constant (a constantly-true branch replaces the conditional; constantly-false branches are removed).
+- **Escape/pointer analysis**: intentionally delegated to the Go toolchain. Rayo transpiles to Go, and the Go compiler already performs escape analysis on the generated code to choose stack-vs-heap allocation; re-deriving those choices in the transpiler would duplicate work Go does better. The transpiler's job is to emit idiomatic Go (value returns where natural, pointers only for constructed class instances), after which `go build` handles escape analysis.
 
 ---
 

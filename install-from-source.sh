@@ -52,22 +52,22 @@ if ! command -v go &> /dev/null; then
     fi
 fi
 
-# Build the binary
-echo "Building ${BINARY_NAME}..."
-make build
+# Build both binaries (rayo CLI and the rayoc alias, matching release archives)
+echo "Building ${BINARY_NAME} and rayoc..."
+make build-all
 
-# Check if binary was created
-if [ ! -f "${BUILD_DIR}/${BINARY_NAME}" ]; then
-    echo -e "${RED}Error: Build failed. Binary not found at ${BUILD_DIR}/${BINARY_NAME}${NC}"
+# Check if binaries were created
+if [ ! -f "${BUILD_DIR}/${BINARY_NAME}" ] || [ ! -f "${BUILD_DIR}/rayoc" ]; then
+    echo -e "${RED}Error: Build failed. Binaries not found in ${BUILD_DIR}/${NC}"
     exit 1
 fi
 
 # Check if we have write permissions to install directory
 if [ ! -w "${INSTALL_DIR}" ]; then
     echo -e "${YELLOW}Installing to ${INSTALL_DIR} requires sudo privileges...${NC}"
-    sudo cp "${BUILD_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/"
+    sudo cp "${BUILD_DIR}/${BINARY_NAME}" "${BUILD_DIR}/rayoc" "${INSTALL_DIR}/"
 else
-    cp "${BUILD_DIR}/${BINARY_NAME}" "${INSTALL_DIR}/"
+    cp "${BUILD_DIR}/${BINARY_NAME}" "${BUILD_DIR}/rayoc" "${INSTALL_DIR}/"
 fi
 
 # Verify installation

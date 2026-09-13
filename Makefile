@@ -1,6 +1,6 @@
 # Makefile for rayo project
 
-.PHONY: test test-golden gofmt fmt fmt-check lint vet build clean dist dist-all release install
+.PHONY: test test-golden gofmt fmt fmt-check lint vet build build-rayoc build-all clean dist dist-all release install
 
 # Build targets
 BINARY_NAME=rayo
@@ -37,6 +37,13 @@ lint: build
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/rayo
+
+# Build the rayoc alias binary (same CLI as rayo).
+build-rayoc:
+	go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/rayoc ./cmd/rayoc
+
+# Build both shipped binaries.
+build-all: build build-rayoc
 
 # Cross-compilation targets
 dist-linux-amd64:
