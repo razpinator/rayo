@@ -1,6 +1,7 @@
 package lex
 
 import (
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -8,6 +9,18 @@ import (
 // Python keywords (subset for demo; use full list in production)
 var pythonKeywords = map[string]struct{}{
 	"if": {}, "elif": {}, "else": {}, "while": {}, "for": {}, "def": {}, "return": {}, "try": {}, "except": {}, "finally": {}, "None": {}, "import": {}, "var": {},
+}
+
+// Keywords returns the sorted list of reserved keywords recognized by the
+// lexer. Tools such as the LSP completion provider use this so their keyword
+// set stays in sync with the lexer's.
+func Keywords() []string {
+	out := make([]string, 0, len(pythonKeywords))
+	for kw := range pythonKeywords {
+		out = append(out, kw)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // Lexer holds state for lexing.

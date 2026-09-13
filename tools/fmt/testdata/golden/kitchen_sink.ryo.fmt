@@ -1,0 +1,23 @@
+# kitchen sink: intentionally messy spacing and indentation
+import "rayo/stdlib/data"
+def compute() {
+    var total = 0
+    for item in items {
+        total = total + item.value * 2
+    }
+    if total > 10 {
+        return total
+    } elif total == 0 {
+        return None
+    } else {
+        return total - 1
+    }
+    config = {"a": 1, "b": 2, "nested": {"x": 10}}
+    result = data.map(items, func(x) {
+        return x + 1
+    })
+    while true {
+        step()
+    }
+    return config["a"]
+}

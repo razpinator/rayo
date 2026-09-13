@@ -1,6 +1,7 @@
 package lsp
 
 import (
+	"encoding/json"
 	"net"
 	"strings"
 	"testing"
@@ -8,15 +9,41 @@ import (
 )
 
 func TestInitializeResult(t *testing.T) {
-	result := handleInitialize()
+	sess := &session{}
+	result := handleInitialize(sess, nil)
 	if result.Capabilities.HoverProvider != true {
 		t.Error("expected hoverProvider true")
 	}
 	if result.Capabilities.DefinitionProvider != true {
 		t.Error("expected definitionProvider true")
 	}
+	if result.Capabilities.CompletionProvider == nil {
+		t.Error("expected completionProvider to be advertised")
+	}
+	if result.Capabilities.ReferencesProvider != true {
+		t.Error("expected referencesProvider true")
+	}
+	if result.Capabilities.DocumentSymbolProvider != true {
+		t.Error("expected documentSymbolProvider true")
+	}
+	if result.Capabilities.WorkspaceSymbolProvider != true {
+		t.Error("expected workspaceSymbolProvider true")
+	}
 	if result.ServerInfo.Name != "rayo" {
 		t.Errorf("expected server name rayo, got %q", result.ServerInfo.Name)
+	}
+}
+
+func TestInitializeNegotiatesSnippetSupport(t *testing.T) {
+	sess := &session{}
+	raw := `{"capabilities":{"textDocument":{"completion":{"completionItem":{"snippetSupport":true}}}}}`
+	var params any
+	if err := json.Unmarshal([]byte(raw), &params); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	handleInitialize(sess, &params)
+	if !sess.snippetSupport {
+		t.Error("expected snippetSupport to be negotiated to true")
 	}
 }
 

@@ -3,7 +3,9 @@ package lsp
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
+	"os"
 	"sync"
 
 	"rayo/internal/diag"
@@ -40,6 +42,18 @@ func (s *docStore) remove(uri string) {
 	delete(s.docs, uri)
 }
 
+// all returns a snapshot of every open document keyed by URI. Callers get a
+// copy so they can iterate without holding the lock.
+func (s *docStore) all() map[string]string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	out := make(map[string]string, len(s.docs))
+	for k, v := range s.docs {
+		out[k] = v
+	}
+	return out
+}
+
 // RunServer starts the LSP server on the given TCP address.
 func RunServer(addr string) error {
 	ln, err := net.Listen("tcp", addr)
@@ -57,58 +71,162 @@ func RunServer(addr string) error {
 	}
 }
 
+// RunServerStdio runs a single LSP session over stdin/stdout. This transport
+// is preferred by many editors (Neovim, Emacs, Helix) that spawn the language
+// server as a child process rather than connecting over TCP.
+func RunServerStdio() error {
+	store := newDocStore()
+	serve(os.Stdin, os.Stdout, store)
+	return nil
+}
+
 func handleConn(conn net.Conn, store *docStore) {
 	defer conn.Close()
-	dec := json.NewDecoder(conn)
-	enc := json.NewEncoder(conn)
+	serve(conn, conn, store)
+}
+
+// serve runs the JSON-RPC read/dispatch loop over an arbitrary reader/writer.
+// It backs both the TCP transport (handleConn) and the stdio transport
+// (RunServerStdio), so the two paths share identical protocol behavior.
+func serve(r io.Reader, w io.Writer, store *docStore) {
+	dec := json.NewDecoder(r)
+	enc := json.NewEncoder(w)
 	enc.SetEscapeHTML(false)
-	session := &session{enc: enc, store: store}
+	sess := &session{enc: enc, store: store}
 
 	for {
 		var req jsonRPCRequest
 		if err := dec.Decode(&req); err != nil {
+			// EOF or malformed stream terminates the connection.
 			return
 		}
-
-		// Notifications have no id
-		isNotification := req.ID == nil
-
-		switch req.Method {
-		case "initialize":
-			result := handleInitialize()
-			if !isNotification {
-				sendResponse(enc, req.ID, result, nil)
+		if req.JSONRPC != "" && req.JSONRPC != "2.0" {
+			if req.ID != nil {
+				sendResponse(enc, req.ID, nil, &jsonRPCError{Code: codeInvalidRequest, Message: "unsupported jsonrpc version"})
 			}
-		case "initialized":
-			// No response
-		case "textDocument/didOpen":
-			handleDidOpen(session, req.Params)
-		case "textDocument/didChange":
-			handleDidChange(session, req.Params)
-		case "textDocument/didClose":
-			handleDidClose(store, req.Params)
-		case "textDocument/hover":
-			result := handleHover(store, req.Params)
-			if !isNotification {
-				sendResponse(enc, req.ID, result, nil)
-			}
-		case "textDocument/definition":
-			result := handleDefinition(store, req.Params)
-			if !isNotification {
-				sendResponse(enc, req.ID, result, nil)
-			}
-		default:
-			if !isNotification {
-				sendResponse(enc, req.ID, nil, &jsonRPCError{Code: -32601, Message: "method not found: " + req.Method})
-			}
+			continue
+		}
+		if dispatch(sess, &req) {
+			return // exit requested
 		}
 	}
 }
 
+// JSON-RPC / LSP error codes.
+const (
+	codeParseError     = -32700
+	codeInvalidRequest = -32600
+	codeMethodNotFound = -32601
+	codeInvalidParams  = -32602
+	codeInternalError  = -32603
+	codeServerNotInit  = -32002
+)
+
+// dispatch handles a single request. It returns true when the server should
+// stop serving (in response to the LSP "exit" notification).
+func dispatch(sess *session, req *jsonRPCRequest) (exit bool) {
+	enc := sess.enc
+	store := sess.store
+	isNotification := req.ID == nil
+
+	// Guard: only "initialize" and "exit" are allowed before initialization.
+	if !sess.initialized && req.Method != "initialize" && req.Method != "exit" {
+		if !isNotification {
+			sendResponse(enc, req.ID, nil, &jsonRPCError{Code: codeServerNotInit, Message: "server not initialized"})
+		}
+		return false
+	}
+
+	switch req.Method {
+	case "initialize":
+		result := handleInitialize(sess, req.Params)
+		sess.initialized = true
+		if !isNotification {
+			sendResponse(enc, req.ID, result, nil)
+		}
+	case "initialized":
+		// Notification, no response.
+	case "shutdown":
+		sess.shutdown = true
+		if !isNotification {
+			sendResponse(enc, req.ID, nil, nil) // result: null
+		}
+	case "exit":
+		return true
+	case "textDocument/didOpen":
+		handleDidOpen(sess, req.Params)
+	case "textDocument/didChange":
+		handleDidChange(sess, req.Params)
+	case "textDocument/didClose":
+		handleDidClose(store, req.Params)
+	case "textDocument/hover":
+		result := handleHover(store, req.Params)
+		if !isNotification {
+			sendResponse(enc, req.ID, result, nil)
+		}
+	case "textDocument/definition":
+		result := handleDefinition(store, req.Params)
+		if !isNotification {
+			sendResponse(enc, req.ID, result, nil)
+		}
+	case "textDocument/completion":
+		result := handleCompletion(store, req.Params, sess.snippetSupport)
+		if !isNotification {
+			sendResponse(enc, req.ID, result, nil)
+		}
+	case "textDocument/references":
+		result := handleReferences(store, req.Params)
+		if !isNotification {
+			sendResponse(enc, req.ID, emptyLocations(result), nil)
+		}
+	case "textDocument/documentSymbol":
+		result := handleDocumentSymbol(store, req.Params)
+		if !isNotification {
+			sendResponse(enc, req.ID, emptyDocSymbols(result), nil)
+		}
+	case "workspace/symbol":
+		result := handleWorkspaceSymbol(store, req.Params)
+		if !isNotification {
+			sendResponse(enc, req.ID, emptySymInfo(result), nil)
+		}
+	default:
+		if !isNotification {
+			sendResponse(enc, req.ID, nil, &jsonRPCError{Code: codeMethodNotFound, Message: "method not found: " + req.Method})
+		}
+	}
+	return false
+}
+
+// emptyLocations guarantees a non-nil JSON array ([] rather than null) so
+// clients that treat null as an error are satisfied.
+func emptyLocations(in []Location) []Location {
+	if in == nil {
+		return []Location{}
+	}
+	return in
+}
+
+func emptyDocSymbols(in []DocumentSymbol) []DocumentSymbol {
+	if in == nil {
+		return []DocumentSymbol{}
+	}
+	return in
+}
+
+func emptySymInfo(in []SymbolInformation) []SymbolInformation {
+	if in == nil {
+		return []SymbolInformation{}
+	}
+	return in
+}
+
 // session holds encoder and store for sending notifications (e.g. publishDiagnostics).
 type session struct {
-	enc   *json.Encoder
-	store *docStore
+	enc            *json.Encoder
+	store          *docStore
+	snippetSupport bool
+	initialized    bool
+	shutdown       bool
 }
 
 func (s *session) publishDiagnostics(uri string, diagnostics []Diagnostic) {
@@ -146,13 +264,30 @@ type jsonRPCError struct {
 	Data    any
 }
 
-func handleInitialize() InitializeResult {
+func handleInitialize(sess *session, params *any) InitializeResult {
+	// Capability negotiation: record what the client supports so responses can
+	// adapt (e.g. plain-text vs snippet completions).
+	if params != nil {
+		b, _ := json.Marshal(params)
+		var p InitializeParams
+		if json.Unmarshal(b, &p) == nil {
+			sess.snippetSupport = p.Capabilities.TextDocument.Completion.CompletionItem.SnippetSupport
+		}
+	}
+
 	fullSync := 1
 	return InitializeResult{
 		Capabilities: ServerCapabilities{
 			TextDocumentSync:   &fullSync,
 			HoverProvider:      true,
 			DefinitionProvider: true,
+			CompletionProvider: &CompletionOptions{
+				TriggerCharacters: []string{"."},
+				ResolveProvider:   false,
+			},
+			ReferencesProvider:      true,
+			DocumentSymbolProvider:  true,
+			WorkspaceSymbolProvider: true,
 		},
 		ServerInfo: struct {
 			Name    string `json:"name"`

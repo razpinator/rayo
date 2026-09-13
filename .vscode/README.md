@@ -23,3 +23,10 @@ This folder contains shared VS Code configuration to improve developer experienc
 ## Rayo LSP
 
 If you use the Rayo LSP (see `tools/lsp/`), configure your client to connect to the language server for `.ryo` files. The workspace treats `*.ryo` as language `rayo` for syntax and snippets.
+
+Start the server one of two ways:
+
+- **TCP** (default, used by the bundled VS Code client): `rayo lsp` listens on `:2087`. Pass an address to override, e.g. `rayo lsp 127.0.0.1:9000`.
+- **stdio** (for editors that spawn the server as a child process — Neovim, Emacs, Helix): `rayo lsp --stdio`.
+
+Server features: diagnostics, hover, go-to-definition, completion (keywords, in-scope names, and `def`/`if`/`try` snippets), find references, document symbols, and workspace symbols (scoped to open documents).

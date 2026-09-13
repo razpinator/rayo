@@ -1,0 +1,20 @@
+# Error Handling
+# Demonstrates try/except/finally blocks
+
+def risky_operation() {
+    if true {  # Simulate error
+        raise ValueError("Something went wrong")
+    }
+    return "success"
+}
+
+def main() {
+    try {
+        result = risky_operation()
+        print("Result: " + result)
+    } except ValueError as e {
+        print("Caught error: " + str(e))
+    } finally {
+        print("Cleanup done")
+    }
+}

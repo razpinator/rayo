@@ -87,9 +87,12 @@ graph TD
    - Provides suggestions for improvement
 
 10. **LSP Server (tools/lsp)**
-    - Implements Language Server Protocol
-    - Provides IDE integration features
-    - Supports syntax highlighting, completion, diagnostics
+    - Implements the Language Server Protocol over both TCP and stdio transports (`serve()` drives one shared read/dispatch loop for both)
+    - Lifecycle: `initialize` (with client capability negotiation) → `initialized` → requests → `shutdown` → `exit`, guarded so requests before `initialize` return a structured "server not initialized" error
+    - Diagnostics, hover, and go-to-definition
+    - Completion: lexer keywords (via `lex.Keywords()`), in-scope declared names, and `def`/`if`/`try` snippets (snippet vs plain-text chosen from negotiated `snippetSupport`)
+    - Navigation: find references, hierarchical document symbols, and workspace symbols (scoped to open documents)
+    - Structured JSON-RPC error handling with standard error codes
 
 ## Data Flow
 

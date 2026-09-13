@@ -1,0 +1,66 @@
+name: ci
+
+# PR gating: build, unit tests, golden tests, and go vet must pass. The Rayo
+# formatter/linter run as informational (non-blocking) steps because the bundled
+# examples are not yet normalized to the formatter's output.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: build & test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test (unit, golden, and tool tests)
+        run: go test ./...
+
+      - name: Golden tests
+        run: go test -run TestGolden ./golden
+
+  fmt-lint:
+    name: fmt & lint (informational)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Build rayo
+        run: go build -o build/rayo ./cmd/rayo
+
+      - name: Check .ryo formatting
+        continue-on-error: true
+        run: ./build/rayo fmt --check examples
+
+      - name: Lint .ryo sources
+        continue-on-error: true
+        run: ./build/rayo lint examples

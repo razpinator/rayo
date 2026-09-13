@@ -1,6 +1,6 @@
 # Makefile for rayo project
 
-.PHONY: test fmt lint build clean dist dist-all release
+.PHONY: test test-golden gofmt fmt fmt-check lint vet build clean dist dist-all release install
 
 # Build targets
 BINARY_NAME=rayo
@@ -15,11 +15,25 @@ LDFLAGS = -X main.version=$(VERSION) -X main.commit=$(COMMIT) -X main.date=$(DAT
 test:
 	go test ./...
 
-fmt:
+# gofmt formats the Go sources (transpiler implementation).
+gofmt:
 	go fmt ./...
 
-lint:
-	golint ./...
+# vet runs go vet across the module.
+vet:
+	go vet ./...
+
+# fmt formats .ryo sources with the Rayo formatter (rewrites in place).
+fmt: build
+	$(BUILD_DIR)/$(BINARY_NAME) fmt examples
+
+# fmt-check verifies .ryo formatting without rewriting (CI gate).
+fmt-check: build
+	$(BUILD_DIR)/$(BINARY_NAME) fmt --check examples
+
+# lint runs the Rayo linter (rules RY001..RY005) over the examples.
+lint: build
+	$(BUILD_DIR)/$(BINARY_NAME) lint examples
 
 build:
 	go build -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/rayo
